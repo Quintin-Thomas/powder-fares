@@ -1,0 +1,17 @@
+{
+ "season": "2026-27",
+ "phase": "el_nino",
+ "strength": "strong",
+ "label": "Strong El Ni\u00f1o",
+ "summary": "NOAA (12 November 2026): El Ni\u00f1o Advisory. El Ni\u00f1o continues to strengthen, with a strong-to-very strong El Ni\u00f1o likely through January-March 2027 (remaining greater than a 79% chance).",
+ "source": "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml",
+ "updated": "12 November 2026",
+ "auto": true,
+ "analogs": [
+  1982,
+  1991,
+  1997,
+  2015,
+  2023
+ ]
+}
