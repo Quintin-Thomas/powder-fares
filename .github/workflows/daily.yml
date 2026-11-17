@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "17 12 * * *"   # ~4-5am Pacific
     - cron: "17 0 * * *"    # ~4-5pm Pacific
+  push:  # code/site changes: rebuild and publish without a flight scan
+    branches: [main]
+    paths: ["site/**", "data/**", "build.py", "snow.py", "scan.py", "pricing/**", ".github/workflows/daily.yml"]
   workflow_dispatch:
     inputs:
       budget:
@@ -33,7 +36,7 @@ jobs:
         run: python snow.py
         continue-on-error: true
       - name: Flight scan
-        run: python scan.py --budget "${{ github.event.inputs.budget || '350' }}"
+        run: python scan.py --budget "${{ github.event_name == 'push' && '0' || github.event.inputs.budget || '350' }}"
       - name: Build page data
         run: python build.py
       - name: Save data back to the repo
