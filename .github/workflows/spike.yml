@@ -3,7 +3,7 @@ name: Phase 0 - Google Flights reachability
 on:
   workflow_dispatch:
   push:
-    paths: ["spike.py", "pricing/**", ".github/workflows/spike.yml"]
+    paths: ["spike.py", "pricing/**", "requirements.txt", ".github/workflows/spike.yml"]
 
 jobs:
   spike:
