@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "22"
       - name: Planner tests (pass math + brute-force check)
-        run: node --test tests/
+        run: node --test tests/*.test.js
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
