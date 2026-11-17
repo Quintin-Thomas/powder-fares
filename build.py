@@ -20,6 +20,22 @@ def days(d: str, r: str) -> list[date]:
     return [a + timedelta(n) for n in range((b - a).days + 1)]
 
 
+def enso_effect(winters: dict[str, float], analogs: list[int]) -> dict | None:
+    """How much more/less Dec-Mar snow this resort got in winters like this one vs all winters.
+
+    Damped halfway toward zero and capped at ±25%, because a handful of analog winters is a small sample.
+    """
+    if not winters or not analogs:
+        return None
+    alls = list(winters.values())
+    picks = [winters[str(y)] for y in analogs if str(y) in winters]
+    if len(picks) < 3 or not sum(alls):
+        return None
+    raw = (sum(picks) / len(picks)) / (sum(alls) / len(alls)) - 1
+    damped = max(-0.25, min(0.25, raw / 2))
+    return {"raw_pct": round(raw * 100), "pct": round(damped * 100), "factor": 1 + damped, "n": len(picks), "of": len(alls)}
+
+
 def snow_raw(clim: dict, fc: dict, d: str, r: str) -> dict | None:
     """Typical base depth and fresh snow (window + 5 days before) from climate; forecast if in range."""
     if not clim:
@@ -46,6 +62,9 @@ def main() -> None:
     passes = load(DATA / "passes.json", {})
     airlines = load(DATA / "airlines.json", {})
     clim = load(STORE / "snow" / "climate.json", {})
+    enso_meta = load(STORE / "snow" / "enso_meta.json", {})
+    winters = load(STORE / "snow" / "winters.json", {})
+    effects = {r["id"]: enso_effect(winters.get(r["id"], {}), enso_meta.get("analogs", [])) for r in resorts}
     season = load(STORE / "snow" / "season.json", {})
     fcast = load(STORE / "snow" / "forecast.json", {})
     today = date.today().isoformat()
@@ -78,6 +97,9 @@ def main() -> None:
         for w in all_windows:
             s = snow_raw(clim.get(r["id"]), fcast.get(r["id"], {}), *w.split("|"))
             if s:
+                eff = effects.get(r["id"])
+                if eff and "forecast_fresh" not in s:  # a real forecast beats the El Niño tendency
+                    s["fresh"] = round(s["fresh"] * eff["factor"], 1)
                 raw[(r["id"], w)] = s
     metric = {k: min(v["depth"] / 2.5, 1) * 0.6 + min(v["fresh"] / 60, 1) * 0.4 for k, v in raw.items()}
     ranked = sorted(metric.values())
@@ -88,7 +110,8 @@ def main() -> None:
     for r in resorts:
         snow = {w: raw[(r["id"], w)] for w in all_windows if (r["id"], w) in raw}
         out_resorts.append({**{k: r[k] for k in ("id", "name", "region", "airports", "access")},
-                            "verify": r.get("verify", []), "snow": snow, "season": season.get(r["id"])})
+                            "verify": r.get("verify", []), "snow": snow, "season": season.get(r["id"]),
+                            "enso": {k: v for k, v in (effects.get(r["id"]) or {}).items() if k != "factor"} or None})
 
     data = {"generated": datetime.now().isoformat(timespec="minutes"), "season": passes.get("season"),
             "passes": passes.get("passes", []), "products": passes.get("products", []),
@@ -97,7 +120,8 @@ def main() -> None:
             "airlines": {"fees": airlines.get("board_bag_fee", {}), "default_fee": airlines.get("default_fee", 50),
                          "default_exclude": airlines.get("default_exclude", []),
                          "exclude_reasons": airlines.get("exclude_reasons", {})},
-            "origins": sorted({p.split("-")[0] for p in routes}), "routes": routes, "resorts": out_resorts}
+            "origins": sorted({p.split("-")[0] for p in routes}), "routes": routes, "resorts": out_resorts,
+            "enso": enso_meta or None}
     SITE.mkdir(exist_ok=True)
     (SITE / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     n = sum(len(w) for w in routes.values())

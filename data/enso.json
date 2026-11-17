@@ -1,0 +1,16 @@
+{
+  "_note": "snow.py reads this winter's El Niño/La Niña status live from NOAA's ENSO discussion each run. 'current' is only a fallback if NOAA's page can't be read. Past winters in the same phase and strength band are picked from NOAA's Oceanic Niño Index.",
+  "discussion_url": "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml",
+  "oni_url": "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+  "since": 1980,
+  "current": {
+    "season": "2026-27",
+    "phase": "el_nino",
+    "strength": "strong",
+    "label": "Strong El Niño",
+    "summary": "NOAA (12 November 2026): El Niño Advisory. Strong-to-very strong El Niño likely through January-March 2027.",
+    "source": "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml",
+    "updated": "12 November 2026"
+  },
+  "fallback_analogs": {"el_nino_strong": [1982, 1991, 1997, 2015, 2023]}
+}

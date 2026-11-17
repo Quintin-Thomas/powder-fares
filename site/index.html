@@ -12,6 +12,7 @@
   <div class="wrap">
     <h1>Powder Fares</h1>
     <p class="lede">Pick your pass. See what it really costs to fly to every mountain on it from LA, with your board bag included, plus how the snow usually looks that week.</p>
+    <p id="enso" class="enso" hidden></p>
   </div>
 </header>
 
@@ -40,7 +41,10 @@
       </select>
     </label>
     <label class="check"><input type="checkbox" id="bag" checked> Board bag</label>
-    <label class="check"><input type="checkbox" id="nofrontier" checked> Skip Frontier</label>
+    <details class="airlines" id="airlines">
+      <summary id="airline-summary">Exclude airlines</summary>
+      <div class="airline-list" id="airline-list"></div>
+    </details>
   </section>
 
   <nav class="tabs" role="tablist">

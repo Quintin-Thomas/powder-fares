@@ -29,7 +29,8 @@
     } catch (e) {}
     if (!trips.length) trips = [{ resort: "", win: "", days: 3 }];
     $("add-trip").addEventListener("click", () => { trips.push({ resort: "", win: "", days: 3 }); draw(); });
-    document.querySelectorAll("#bag,#nofrontier").forEach((el) => el.addEventListener("change", draw));
+    $("bag").addEventListener("change", draw);
+    document.addEventListener("pf-filters", draw);
     draw();
   }
 
