@@ -79,3 +79,14 @@ body[data-view="view-plan"] .controls label:not(.check) { display: none; }
 .plan td select[data-f="first"] { display: block; margin: 4px 0 0 auto; font-size: 12px; }
 body[data-view="view-plan"] #sort-help { display: none; }
 .caution { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--chip); color: var(--ink); font-size: 13px; }
+
+/* Multi-mountain cards */
+.days { list-style: none; margin: 2px 0; padding: 0; font-size: 13px; border-left: 2px solid var(--line); }
+.days li { padding: 2px 0 2px 10px; }
+.days li.off { color: var(--warn); }
+.days .d { display: inline-block; min-width: 88px; color: var(--muted); }
+.mode { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+.mode.best-mode { border-color: var(--good); }
+.legs { margin: 4px 0; padding-left: 18px; font-size: 13px; }
+.legs li { margin: 3px 0; }
+.card.cluster .caution { margin-top: 2px; }

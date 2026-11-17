@@ -18,6 +18,9 @@
 
 <main class="wrap">
   <section class="controls" aria-label="Filters">
+    <label>Trip type
+      <select id="kind"><option value="single">Single mountain</option><option value="multi">Multi-mountain</option></select>
+    </label>
     <label>Pass
       <select id="pass"></select>
     </label>
@@ -69,11 +72,13 @@
 </main>
 
 <footer class="wrap foot">
-  <p><strong>Estimates, not quotes.</strong> Fares are read from Google Flights searches (round trip, 1 adult, economy) and can change at any time. Board-bag fees are typical 2026 prepaid prices per direction. Check the airline before you book. The historical snow rating (A–F) compares typical conditions for that week across all mountains, using 10 past winters of Open-Meteo data adjusted for this winter's El Niño/La Niña outlook. It is not a forecast. A 16-day forecast appears separately, labeled "Forecast", once your dates are close enough. Pass access is based on published 2026-27 lists. Confirm at ikonpass.com or epicpass.com.</p>
+  <p><strong>Estimates, not quotes.</strong> Fares are read from Google Flights searches (round trip or one-way legs, 1 adult, economy) and can change at any time. Board-bag fees are typical 2026 prepaid prices per direction. Check the airline before you book. The historical snow rating (A–F) compares typical conditions for that week across all mountains, using 10 past winters of Open-Meteo data adjusted for this winter's El Niño/La Niña outlook. It is not a forecast. A 16-day forecast appears separately, labeled "Forecast", once your dates are close enough. Pass access is based on published 2026-27 lists. Confirm at ikonpass.com or epicpass.com.</p>
   <p id="updated"></p>
 </footer>
 <script src="app.js"></script>
 <script src="planner-core.js"></script>
+<script src="cluster-core.js"></script>
+<script src="clusters.js"></script>
 <script src="planner.js"></script>
 </body>
 </html>

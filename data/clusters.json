@@ -1,0 +1,155 @@
+{
+  "_note": "Multi-mountain trips. Offsets are days after the outbound flight (day 0). night_offsets = nights lodged near that resort; ski_day_offsets = days actually skied there (a stop with no nights is a day trip). A day may be both a ski day and a transfer day only if that drive is short (ski, then drive in the evening). Drive minutes: OSRM road routing, free-flow, no winter conditions or border waits.",
+  "drive_source": "OSRM road routing (router.project-osrm.org), checked 2026-11-17; free-flow estimates, add time for snow and chain-ups",
+  "places": {
+    "YVR": "Vancouver airport", "YLW": "Kelowna airport", "SLC": "Salt Lake City airport", "DEN": "Denver airport"
+  },
+  "clusters": [
+    {
+      "id": "vancouver-bc-interior",
+      "name": "Vancouver → BC Interior",
+      "region": "British Columbia",
+      "resort_pool": ["cypress", "sun-peaks", "silver-star", "revelstoke"],
+      "notes": ["Coquihalla Hwy (5) and Hwy 1 mountain passes: winter tires required Oct 1 – Apr 30, closures possible."],
+      "variants": [
+        {
+          "id": "bc-5n", "nights": 5, "label": "Sun Peaks + SilverStar",
+          "stops": [
+            {"resort": "sun-peaks", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2]},
+            {"resort": "silver-star", "night_offsets": [3, 4], "ski_day_offsets": [4]}
+          ],
+          "transfer_day_offsets": [0, 3, 5],
+          "travel_modes": [
+            {"kind": "oj", "arrive": "YVR", "depart": "YLW", "ground_route": ["YVR", "sun-peaks", "silver-star", "YLW"]},
+            {"kind": "rt", "arrive": "YVR", "depart": "YVR", "ground_route": ["YVR", "sun-peaks", "silver-star", "YVR"]}
+          ]
+        },
+        {
+          "id": "bc-7n-coast", "nights": 7, "label": "Cypress + Sun Peaks + SilverStar",
+          "stops": [
+            {"resort": "cypress", "night_offsets": [0, 1], "ski_day_offsets": [1]},
+            {"resort": "sun-peaks", "night_offsets": [2, 3, 4], "ski_day_offsets": [3, 4]},
+            {"resort": "silver-star", "night_offsets": [5, 6], "ski_day_offsets": [6]}
+          ],
+          "transfer_day_offsets": [0, 2, 5, 7],
+          "travel_modes": [
+            {"kind": "oj", "arrive": "YVR", "depart": "YLW", "ground_route": ["YVR", "cypress", "sun-peaks", "silver-star", "YLW"]},
+            {"kind": "rt", "arrive": "YVR", "depart": "YVR", "ground_route": ["YVR", "cypress", "sun-peaks", "silver-star", "YVR"]}
+          ]
+        },
+        {
+          "id": "bc-7n-revelstoke", "nights": 7, "label": "Sun Peaks + Revelstoke",
+          "stops": [
+            {"resort": "sun-peaks", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2]},
+            {"resort": "revelstoke", "night_offsets": [3, 4, 5, 6], "ski_day_offsets": [4, 5, 6]}
+          ],
+          "transfer_day_offsets": [0, 3, 7],
+          "travel_modes": [
+            {"kind": "oj", "arrive": "YVR", "depart": "YLW", "ground_route": ["YVR", "sun-peaks", "revelstoke", "YLW"]},
+            {"kind": "rt", "arrive": "YVR", "depart": "YVR", "ground_route": ["YVR", "sun-peaks", "revelstoke", "YVR"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wasatch",
+      "name": "Wasatch: Cottonwoods + Park City",
+      "region": "Utah",
+      "resort_pool": ["snowbird", "solitude", "deer-valley"],
+      "notes": ["Little and Big Cottonwood Canyon roads close for avalanche control; traction rules apply."],
+      "variants": [
+        {
+          "id": "wasatch-5n", "nights": 5, "label": "Snowbird + Solitude",
+          "stops": [
+            {"resort": "snowbird", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2, 3]},
+            {"resort": "solitude", "night_offsets": [3, 4], "ski_day_offsets": [4]}
+          ],
+          "transfer_day_offsets": [0, 3, 5],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "SLC", "depart": "SLC", "ground_route": ["SLC", "snowbird", "solitude", "SLC"]}
+          ]
+        },
+        {
+          "id": "wasatch-7n", "nights": 7, "label": "Snowbird + Solitude + Deer Valley",
+          "stops": [
+            {"resort": "snowbird", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2, 3]},
+            {"resort": "solitude", "night_offsets": [3, 4], "ski_day_offsets": [4, 5]},
+            {"resort": "deer-valley", "night_offsets": [5, 6], "ski_day_offsets": [6]}
+          ],
+          "transfer_day_offsets": [0, 3, 5, 7],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "SLC", "depart": "SLC", "ground_route": ["SLC", "snowbird", "solitude", "deer-valley", "SLC"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "colorado-i70",
+      "name": "Colorado I-70",
+      "region": "Colorado",
+      "resort_pool": ["winter-park", "copper", "a-basin", "breckenridge", "keystone"],
+      "notes": ["I-70 weekend traffic and chain/traction laws can double drive times."],
+      "variants": [
+        {
+          "id": "co-ikon-5n", "nights": 5, "label": "Winter Park + Copper",
+          "stops": [
+            {"resort": "winter-park", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2, 3]},
+            {"resort": "copper", "night_offsets": [3, 4], "ski_day_offsets": [4]}
+          ],
+          "transfer_day_offsets": [0, 3, 5],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "DEN", "depart": "DEN", "ground_route": ["DEN", "winter-park", "copper", "DEN"]}
+          ]
+        },
+        {
+          "id": "co-ikon-7n", "nights": 7, "label": "Winter Park + Copper + A-Basin",
+          "stops": [
+            {"resort": "winter-park", "night_offsets": [0, 1, 2], "ski_day_offsets": [1, 2, 3]},
+            {"resort": "copper", "night_offsets": [3, 4, 5, 6], "ski_day_offsets": [4, 6]},
+            {"resort": "a-basin", "night_offsets": [], "ski_day_offsets": [5]}
+          ],
+          "transfer_day_offsets": [0, 3, 7],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "DEN", "depart": "DEN", "ground_route": ["DEN", "winter-park", "copper", "DEN"]}
+          ]
+        },
+        {
+          "id": "co-epic-5n", "nights": 5, "label": "Breckenridge + Keystone",
+          "stops": [
+            {"resort": "breckenridge", "night_offsets": [0, 1, 2, 3, 4], "ski_day_offsets": [1, 2, 4]},
+            {"resort": "keystone", "night_offsets": [], "ski_day_offsets": [3]}
+          ],
+          "transfer_day_offsets": [0, 5],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "DEN", "depart": "DEN", "ground_route": ["DEN", "breckenridge", "DEN"]}
+          ]
+        },
+        {
+          "id": "co-epic-7n", "nights": 7, "label": "Breckenridge + Keystone",
+          "stops": [
+            {"resort": "breckenridge", "night_offsets": [0, 1, 2, 3, 4, 5, 6], "ski_day_offsets": [1, 2, 4, 6]},
+            {"resort": "keystone", "night_offsets": [], "ski_day_offsets": [3, 5]}
+          ],
+          "transfer_day_offsets": [0, 7],
+          "travel_modes": [
+            {"kind": "rt", "arrive": "DEN", "depart": "DEN", "ground_route": ["DEN", "breckenridge", "DEN"]}
+          ]
+        }
+      ]
+    }
+  ],
+  "drives": {
+    "YVR>cypress": 59, "cypress>sun-peaks": 330, "YVR>sun-peaks": 316, "sun-peaks>silver-star": 178,
+    "silver-star>YLW": 64, "silver-star>YVR": 375, "sun-peaks>revelstoke": 226, "revelstoke>YLW": 174,
+    "revelstoke>YVR": 442,
+    "SLC>snowbird": 52, "snowbird>solitude": 47, "solitude>deer-valley": 63, "deer-valley>SLC": 54, "solitude>SLC": 54,
+    "DEN>winter-park": 130, "winter-park>copper": 94, "copper>DEN": 129, "copper>a-basin": 36,
+    "DEN>breckenridge": 145, "breckenridge>DEN": 145, "breckenridge>keystone": 39
+  },
+  "drive_cautions": {
+    "YVR>sun-peaks": "Coquihalla Pass", "cypress>sun-peaks": "Coquihalla Pass", "silver-star>YVR": "Coquihalla Pass",
+    "revelstoke>YVR": "Rogers Pass region + Coquihalla", "sun-peaks>revelstoke": "Trans-Canada Hwy 1",
+    "DEN>winter-park": "Berthoud Pass", "winter-park>copper": "Berthoud Pass", "copper>DEN": "I-70 Eisenhower Tunnel",
+    "DEN>breckenridge": "I-70 Eisenhower Tunnel", "breckenridge>DEN": "I-70 Eisenhower Tunnel"
+  }
+}

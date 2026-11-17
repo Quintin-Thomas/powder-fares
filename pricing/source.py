@@ -23,6 +23,8 @@ class Quote:
     price: int  # fare, all passengers, before bag fees
     airlines: list[str]
     stops: int
+    depart_time: str | None = None  # "HH:MM" local, first segment
+    arrive_time: str | None = None  # "HH:MM" local, last segment
 
 
 @dataclass
@@ -34,6 +36,7 @@ class SearchResult:
     typical_high: int | None = None
     typical: int | None = None
     history: dict[str, int] = field(default_factory=dict)  # day -> lowest fare that day (all airlines)
+    currency: str = "USD"
 
     def cheapest(self, cost=lambda q: q.price) -> Quote | None:
         return min(self.quotes, key=cost) if self.quotes else None

@@ -21,7 +21,10 @@ function start(data) {
   D = data;
   $("pass").innerHTML = D.passes.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
   $("origin").innerHTML += D.origins.map((o) => `<option value="${o}">${o} only</option>`).join("");
-  try { const saved = JSON.parse(localStorage.getItem("pf") || "{}"); for (const k in saved) if ($(k)) $(k)[typeof saved[k] === "boolean" ? "checked" : "value"] = saved[k]; } catch (e) {}
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem("pf") || "{}"); for (const k in saved) if ($(k)) $(k)[typeof saved[k] === "boolean" ? "checked" : "value"] = saved[k]; } catch (e) {}
+  syncShape(saved.shape);
+  $("kind").addEventListener("change", () => syncShape());
   setupAirlines();
   document.querySelectorAll(".controls select, .controls > label input").forEach((el) => el.addEventListener("change", render));
   const h = D.health;
@@ -38,6 +41,17 @@ function start(data) {
   document.dispatchEvent(new Event("pf-ready"));
 }
 
+// Trip-length choices depend on the trip type: 3-night single trips vs 5/7-night multi-mountain trips.
+const SHAPES = {
+  single: [["any", "Any"], ["0", "Mon–Thu (midweek)"], ["3", "Thu–Sun (weekend)"]],
+  multi: [["any", "5 or 7 nights"], ["5", "5 nights (Sat–Thu)"], ["7", "7 nights (Sat–Sat)"]],
+};
+function syncShape(want) {
+  const list = SHAPES[$("kind").value] || SHAPES.single, cur = want || $("shape").value;
+  $("shape").innerHTML = list.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+  $("shape").value = list.some(([v]) => v === cur) ? cur : "any";
+}
+
 function bagFee(airlines) {
   return Math.max(...airlines.map((a) => D.airlines.fees[a] ?? D.airlines.default_fee));
 }
@@ -46,8 +60,9 @@ function bagFee(airlines) {
 let EXCLUDE = new Set();
 function setupAirlines() {
   const all = new Set();
-  for (const wins of Object.values(D.routes)) for (const w of Object.values(wins))
-    for (const name of Object.keys(w.by_airline)) name.split(", ").forEach((a) => all.add(a));
+  for (const src of [D.routes, D.cluster_routes || {}, D.oneway || {}])
+    for (const wins of Object.values(src)) for (const w of Object.values(wins))
+      for (const name of Object.keys(w.by_airline)) name.split(", ").forEach((a) => all.add(a));
   try { EXCLUDE = new Set(JSON.parse(localStorage.getItem("pf-exclude") || "null") || D.airlines.default_exclude); }
   catch (e) { EXCLUDE = new Set(D.airlines.default_exclude); }
   const reasons = D.airlines.exclude_reasons || {};
@@ -104,11 +119,12 @@ function accessLabel(a) {
 }
 
 function render() {
-  const opts = { pass: $("pass").value, origin: $("origin").value, month: $("month").value, shape: $("shape").value,
+  const opts = { kind: $("kind").value, pass: $("pass").value, origin: $("origin").value, month: $("month").value, shape: $("shape").value,
                  sort: $("sort").value, bag: $("bag").checked, exclude: EXCLUDE };
   try { localStorage.setItem("pf", JSON.stringify(opts)); } catch (e) {}
   const pass = D.passes.find((p) => p.id === opts.pass);
   const origins = opts.origin === "any" ? D.origins : [opts.origin];
+  if (opts.kind === "multi" && window.PFClusterUI) return window.PFClusterUI.render(opts, pass, origins);
 
   const cards = [];
   for (const r of D.resorts) {

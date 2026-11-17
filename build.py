@@ -57,6 +57,40 @@ def snow_raw(clim: dict, fc: dict, d: str, r: str) -> dict | None:
     return out
 
 
+def day_metric(clim: dict, mmdd_day: date, factor: float = 1.0) -> float | None:
+    """One ski day's historical conditions: typical base that day + usual new snow over the 6 days up to it.
+
+    Used for multi-mountain trips so a 1-day stop and a 4-day stop are scored on the same per-day scale."""
+    row = clim.get(mmdd_day.strftime("%m-%d"))
+    if not row:
+        return None
+    fresh = sum((clim.get((mmdd_day - timedelta(n)).strftime("%m-%d")) or [0, 0])[1] for n in range(6)) * factor
+    return min(row[0] / 2.5, 1) * 0.6 + min(fresh / 40, 1) * 0.4
+
+
+def day_snow(resorts: list[dict], clim: dict, effects: dict, keep: set[str]) -> dict:
+    """Percentile (0-100) of each resort-day, ranked against every resort-day Dec 1 - Apr 30; kept for `keep`."""
+    yr = 2027  # any non-leap reference year; only month-day matters
+    days_ = [date(yr - 1, 12, 1) + timedelta(n) for n in range((date(yr, 4, 30) - date(yr - 1, 12, 1)).days + 1)]
+    vals = {}
+    for r in resorts:
+        c = clim.get(r["id"])
+        if not c:
+            continue
+        f = (effects.get(r["id"]) or {}).get("factor", 1.0)
+        for d in days_:
+            m = day_metric(c, d, f)
+            if m is not None:
+                vals[(r["id"], d.strftime("%m-%d"))] = m
+    ranked = sorted(vals.values())
+    import bisect
+    out: dict[str, dict] = {}
+    for (rid, md), m in vals.items():
+        if rid in keep:
+            out.setdefault(rid, {})[md] = round(100 * bisect.bisect_right(ranked, m) / len(ranked))
+    return out
+
+
 def main() -> None:
     resorts = load(DATA / "resorts.json", {})["resorts"]
     passes = load(DATA / "passes.json", {})
@@ -69,14 +103,17 @@ def main() -> None:
     fcast = load(STORE / "snow" / "forecast.json", {})
     today = date.today().isoformat()
 
-    routes = {}
+    routes, cluster_routes = {}, {}
     for qf in sorted((STORE / "quotes").glob("*.json")):
         pair = qf.stem
         quotes, hist = load(qf, {}), load(STORE / "history" / qf.name, {})
-        wins = {}
+        wins, cwins = {}, {}
         for wkey, q in quotes.items():
             d, r = wkey.split("|")
             if d <= today:
+                continue
+            if (date.fromisoformat(r) - date.fromisoformat(d)).days != 3:  # 5/7-night multi-mountain windows
+                cwins[wkey] = {k: q.get(k) for k in ("checked", "url", "by_airline", "currency")}
                 continue
             g = [v for k, v in sorted(hist.get(wkey, {}).get("google", {}).items())][-60:]
             fares = [v[0] for v in q["by_airline"].values()]
@@ -89,6 +126,8 @@ def main() -> None:
                           "g60": [min(g), round(median(g)), max(g)] if g else None,
                           "spark": g[::3]}
         routes[pair] = wins
+        if cwins:
+            cluster_routes[pair] = cwins
 
     # Snow score 0-100: rank of (typical base + fresh snow) across every resort x window.
     raw = {}
@@ -106,6 +145,16 @@ def main() -> None:
     for k, v in raw.items():
         v["score"] = round(100 * sum(x <= metric[k] for x in ranked) / len(ranked))
 
+    # Multi-mountain trips: one-way legs, cluster definitions and per-ski-day snow.
+    oneway = {}
+    for qf in sorted((STORE / "quotes" / "ow").glob("*.json")):
+        legs = {d: {k: q.get(k) for k in ("checked", "url", "by_airline", "currency")}
+                for d, q in load(qf, {}).items() if d > today}
+        if legs:
+            oneway[qf.stem] = legs
+    clusters = load(DATA / "clusters.json", {"clusters": []})
+    pool = {s["resort"] for c in clusters["clusters"] for v in c["variants"] for s in v["stops"]}
+
     out_resorts = []
     for r in resorts:
         snow = {w: raw[(r["id"], w)] for w in all_windows if (r["id"], w) in raw}
@@ -121,11 +170,16 @@ def main() -> None:
                          "default_exclude": airlines.get("default_exclude", []),
                          "exclude_reasons": airlines.get("exclude_reasons", {})},
             "origins": sorted({p.split("-")[0] for p in routes}), "routes": routes, "resorts": out_resorts,
+            "clusters": clusters.get("clusters", []), "drives": clusters.get("drives", {}),
+            "drive_cautions": clusters.get("drive_cautions", {}), "drive_source": clusters.get("drive_source"),
+            "places": clusters.get("places", {}),
+            "cluster_routes": cluster_routes, "oneway": oneway, "day_snow": day_snow(resorts, clim, effects, pool),
             "enso": enso_meta or None, "health": load(STORE / "last_scan.json", None)}
     SITE.mkdir(exist_ok=True)
     (SITE / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     n = sum(len(w) for w in routes.values())
-    print(f"built site/data.json: {len(routes)} routes, {n} windows, {len(out_resorts)} resorts, {len(raw)} snow cells")
+    print(f"built site/data.json: {len(routes)} routes, {n} windows, {len(out_resorts)} resorts, {len(raw)} snow cells; "
+          f"{len(clusters.get('clusters', []))} multi-mountain clusters, {sum(map(len, oneway.values()))} one-way legs")
 
 
 if __name__ == "__main__":

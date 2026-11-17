@@ -25,6 +25,7 @@ class GoogleFlights:
     def __init__(self, currency: str = "USD", pause: float = 2.0, attempts: int = 3, log=print):
         self.currency, self.pause, self.attempts, self.log = currency, pause, attempts, log
         self.proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+        self.errors: dict[str, int] = {}  # failed attempts by kind, for scan health
 
     def _query(self, it: Itinerary):
         legs = [FlightQuery(date=it.depart.isoformat(), from_airport=it.origin, to_airport=it.dest)]
@@ -46,13 +47,27 @@ class GoogleFlights:
                 merged = [*((payload[2] or [[]])[0] or []), *((payload[3] or [[]])[0] or [])]
                 payload[3] = [merged or None, *(payload[3] or [None])[1:]]
                 flights = parse_js("data:" + json.dumps(payload) + ",0")
-                quotes = [Quote(price=f.price, airlines=list(f.airlines), stops=len(f.flights) - 1)
+                quotes = [Quote(price=f.price, airlines=list(f.airlines), stops=len(f.flights) - 1,
+                                depart_time=_hhmm(f.flights[0].departure) if f.flights else None,
+                                arrive_time=_hhmm(f.flights[-1].arrival) if f.flights else None)
                           for f in flights if f.price and f.price > 0]
                 time.sleep(self.pause)
-                return SearchResult(itinerary=it, quotes=quotes, url=q.url(), **_insights(payload))
+                return SearchResult(itinerary=it, quotes=quotes, url=q.url(), currency=self.currency, **_insights(payload))
             except Exception as e:  # network hiccups, throttling, page changes
                 self.log(f"  {it.key()} attempt {i + 1} failed: {type(e).__name__}: {e}")
+                kind = "blocked_or_no_results" if "no results block" in str(e) else \
+                    "timeout" if "timeout" in type(e).__name__.lower() or "timed out" in str(e).lower() else type(e).__name__
+                self.errors[kind] = self.errors.get(kind, 0) + 1
                 time.sleep(5 * (i + 1))
+        return None
+
+
+def _hhmm(t) -> str | None:
+    """SimpleDatetime -> "HH:MM" (local airport time), or None if Google left it out."""
+    try:
+        h, m = (list(t.time) + [0, 0])[:2]
+        return f"{int(h):02d}:{int(m or 0):02d}"
+    except (TypeError, ValueError, AttributeError):
         return None
 
 
