@@ -137,6 +137,20 @@ def main() -> int:
         save(STORE / "quotes" / f"{pair}.json", quotes)
         save(STORE / "history" / f"{pair}.json", history)
     save(STORE / "scan_state.json", state)
+    if todo:  # health record for the site footer (skipped on publish-only runs)
+        week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+
+        def recent(u) -> bool:
+            t = state.get(key(u))
+            if not t:
+                return False
+            t = datetime.fromisoformat(t.replace("Z", "+00:00"))
+            return (t if t.tzinfo else t.replace(tzinfo=timezone.utc)) >= week_ago
+
+        save(STORE / "last_scan.json", {
+            "finished": datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z"),
+            "searched": len(todo), "ok": ok, "failed": fail,
+            "windows_total": len(units), "windows_checked_7d": sum(map(recent, units))})
     log(f"done: {ok} ok, {fail} failed")
     return 0 if ok or not todo else 1
 

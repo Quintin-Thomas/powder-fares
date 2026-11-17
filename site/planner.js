@@ -4,7 +4,6 @@
   const $ = (id) => document.getElementById(id);
   const DAY = 864e5;
   const addDays = (iso, n) => new Date(Date.parse(iso + "T12:00:00Z") + n * DAY).toISOString().slice(0, 10);
-  const GROUPS = { alta: "alta-snowbird", snowbird: "alta-snowbird", killington: "killington-pico", pico: "killington-pico" };
   let PF, D, trips = [], ticketOverride = {};
 
   // Tabs work even before data loads.
@@ -108,41 +107,7 @@
     try { localStorage.setItem("pf-trips", JSON.stringify(trips)); localStorage.setItem("pf-tickets", JSON.stringify(ticketOverride)); } catch (e) {}
   }
 
-  // ---- optimizer -------------------------------------------------------
-  function seasonCover(pass, r, date, used) {
-    const a = r.access[pass.id];
-    if (a == null) return false;
-    const s = String(a);
-    const blackoutApplies = pass.blackouts.length && (pass.id !== "epic_local" || s.includes("holiday"));
-    if (blackoutApplies && pass.blackouts.some(([x, y]) => x <= date && date <= y)) return false;
-    const cap = a === "unlimited" || s.startsWith("unlimited") || s === "holiday blackouts" ? Infinity : parseInt(s, 10) || Infinity;
-    const group = GROUPS[r.id] || (s.includes("combined") ? `${pass.id}:${s.replace(/ with .*/, "")}` : `${pass.id}:${r.id}`);
-    if ((used[group] || 0) >= cap) return false;
-    used[group] = (used[group] || 0) + 1;
-    return true;
-  }
-
-  function price(skiDays, ikon, epic) {
-    // ikon/epic: {kind:'none'} | {kind:'season', pass} | {kind:'pool', product, days, cost}
-    let cost = 0, tickets = 0;
-    const used = {}, pool = { ikon: ikon.kind === "pool" ? ikon.days : 0, epic: epic.kind === "pool" ? epic.days : 0 };
-    const parts = []; // [{label, cost, days: {resortName: n}}] — what pays for which days
-    const part = (label, c) => { let x = parts.find((p) => p.label === label); if (!x) parts.push(x = { label, cost: c, days: {} }); return x; };
-    for (const p of [ikon, epic]) {
-      if (p.kind === "season") { cost += p.pass.price_adult; part(p.pass.name, p.pass.price_adult); }
-      if (p.kind === "pool") { cost += p.cost; part(p.label, p.cost); }
-    }
-    for (const d of skiDays) { // sorted by ticket price, highest first
-      let by = null;
-      for (const p of [ikon, epic]) if (!by && p.kind === "season" && seasonCover(p.pass, d.r, d.date, used)) by = p.pass.name;
-      for (const [brand, p] of [["ikon", ikon], ["epic", epic]]) {
-        if (!by && p.kind === "pool" && pool[brand] > 0 && d.r.access[brand] != null) { pool[brand]--; by = p.label; }
-      }
-      if (!by) { cost += d.price; tickets += 1; by = "Day tickets"; const t = part(by, 0); t.cost += d.price; }
-      const x = part(by, 0); x.days[d.r.name] = (x.days[d.r.name] || 0) + 1;
-    }
-    return { cost, tickets, parts: parts.filter((p) => Object.keys(p.days).length || p.cost) };
-  }
+  // Pass math lives in planner-core.js (window.PFCore) so it can be unit-tested.
 
   // Plain-language buying advice for the cheapest option.
   function advice(best, base, scored, totalDays, flights, name) {
@@ -167,11 +132,14 @@
       save += ".";
     }
     const trip = flights ? `Estimated lift access + flights${PF.opts().bag ? " (with board bags)" : ""}: about <strong>${$$(best.cost + flights)}</strong>. Lodging, ground transport and meals aren't included.` : "";
+    const verifiedBest = scored.find((s) => !s.unverified);
+    const caution = best.unverified
+      ? `<p class="caution">⚠ This depends on pass coverage we haven't verified (the Ikon Session Pass resort list, or a resort's day limit). Check ikonpass.com or epicpass.com before buying.${verifiedBest ? ` The cheapest option using only verified rules is <strong>${PF.esc(name(verifiedBest))}</strong> at ${$$(verifiedBest.cost)}.` : ""}</p>` : "";
     return `<div class="best">
       <div class="meta">The cheapest way to ski your ${days}</div>
       <div class="row"><span class="price">${$$(best.cost)}</span><span class="break">in lift costs</span></div>
       <ol class="steps">${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
-      <p class="meta">${save} ${trip}</p></div>`;
+      <p class="meta">${save} ${trip}</p>${caution}</div>`;
   }
 
   // "Epic Day Pass 3-day ($384): Park City ×3 · Day tickets ($375): Brighton ×3"
@@ -180,19 +148,6 @@
       const where = Object.entries(p.days).map(([n, k]) => `${PF.esc(n)} ×${k}`).join(", ");
       return `<strong>${PF.esc(p.label)}</strong> ($${p.cost.toLocaleString()}): ${where || `<span class="note">no days used here</span>`}`;
     }).join(" · ");
-  }
-
-  function options() {
-    const side = (brand) => {
-      const out = [{ kind: "none", label: "" }];
-      for (const p of D.passes.filter((p) => p.brand.toLowerCase() === brand)) out.push({ kind: "season", pass: p, label: p.name });
-      for (const pr of D.products.filter((p) => p.covers === brand))
-        for (const [n, c] of Object.entries(pr.prices)) out.push({ kind: "pool", product: pr, days: +n, cost: c, label: `${pr.name.replace(" (All Resorts)", "")} ${n}-day` });
-      return out;
-    };
-    const res = [];
-    for (const i of side("ikon")) for (const e of side("epic")) res.push({ ikon: i, epic: e, label: [i.label, e.label].filter(Boolean).join(" + ") || "Day tickets only" });
-    return res;
   }
 
   function results() {
@@ -206,13 +161,12 @@
       const dates = t.win ? skiDatesISO(t) : Array(t.days).fill("");
       for (const date of dates) skiDays.push({ r, price: ticket(r.id), date });
     }
-    skiDays.sort((a, b) => b.price - a.price);
-    const scored = options().map((o) => ({ ...o, ...price(skiDays, o.ikon, o.epic) })).sort((a, b) => a.cost - b.cost);
+    const scored = window.PFCore.plan(D, skiDays);
     const base = scored.find((s) => s.label === "Day tickets only");
     const best = scored[0];
     const totalDays = skiDays.length;
     const name = (s) => s.label === "Day tickets only" ? s.label : s.label + (s.tickets ? ` + ${s.tickets} day ticket${s.tickets > 1 ? "s" : ""}` : "");
-    const rows = scored.slice(0, 10).map((s, i) => `<tr class="${i === 0 ? "top" : ""}"><td>${PF.esc(name(s))}
+    const rows = scored.slice(0, 10).map((s, i) => `<tr class="${i === 0 ? "top" : ""}"><td>${PF.esc(name(s))}${s.unverified ? ` <span class="chip warn" title="Relies on pass coverage we haven't verified on the official site">unverified</span>` : ""}
         <div class="note">${describe(s)}</div></td>
       <td class="num">$${s.cost.toLocaleString()}</td>
       <td class="num">${s.cost < base.cost ? `save $${(base.cost - s.cost).toLocaleString()}` : s === base ? "—" : `+$${(s.cost - base.cost).toLocaleString()}`}</td>

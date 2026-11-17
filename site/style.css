@@ -78,3 +78,4 @@ body[data-view="view-plan"] .controls label:not(.check) { display: none; }
 .error { background: var(--card); border: 1px solid var(--bad); border-radius: var(--radius); padding: 14px 16px; }
 .plan td select[data-f="first"] { display: block; margin: 4px 0 0 auto; font-size: 12px; }
 body[data-view="view-plan"] #sort-help { display: none; }
+.caution { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--chip); color: var(--ink); font-size: 13px; }

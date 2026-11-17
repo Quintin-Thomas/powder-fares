@@ -67,7 +67,8 @@
   "https://www.ikonpass.com/en/shop-passes/ikon-base-pass",
   "https://www.epicpass.com",
   "https://unofficialnetworks.com/2026/09/10/how-expensive-is-skiing-2026/",
-  "https://www.valleyviewvt.com/vermont-ski-pass-guide/"
+  "https://www.valleyviewvt.com/vermont-ski-pass-guide/",
+  "https://www.epicpass.com/info/peak-restricted-dates.aspx"
  ],
  "verified_on": "2026-11-16",
  "products": [
@@ -81,7 +82,25 @@
     "3": 509,
     "4": 639
    },
-   "note": "2, 3 or 4 days total across Ikon destinations. The 2-day price is published; 3- and 4-day prices are estimates. Some destinations may be excluded."
+   "note": "2, 3 or 4 days total. Resort list not published in a form we could verify: we only count resorts on the Ikon Base Pass, with Base blackout dates (one 2026-27 source says Session shares them). Confirm on ikonpass.com. The 2-day price is published; 3- and 4-day prices are estimates.",
+   "eligible": {
+    "from_pass": "ikon_base"
+   },
+   "blackouts": [
+    [
+     "2026-12-26",
+     "2026-12-30"
+    ],
+    [
+     "2027-01-16",
+     "2027-01-17"
+    ],
+    [
+     "2027-02-13",
+     "2027-02-14"
+    ]
+   ],
+   "verified": false
   },
   {
    "id": "epic_day",
@@ -97,7 +116,37 @@
     "6": 660,
     "7": 740
    },
-   "note": "1-7 days at Epic resorts. The 4-day price ($481) is published; other day counts are estimates."
+   "note": "Restricted Epic Day Pass (All Resorts): blackout dates from epicpass.com; Telluride and partner resorts only with 4+ days. The 4-day price ($481) is published; other prices are estimates.",
+   "blackouts": [
+    [
+     "2026-11-27",
+     "2026-11-28"
+    ],
+    [
+     "2026-12-26",
+     "2026-12-31"
+    ],
+    [
+     "2027-01-16",
+     "2027-01-16"
+    ],
+    [
+     "2027-02-13",
+     "2027-02-14"
+    ]
+   ],
+   "partner_min_days": 4,
+   "partner_resorts": [
+    "telluride",
+    "fernie",
+    "kicking-horse",
+    "kimberley",
+    "nakiska",
+    "stoneham",
+    "mont-sainte-anne"
+   ],
+   "verified": true,
+   "source": "https://www.epicpass.com/info/peak-restricted-dates.aspx"
   }
  ]
 }

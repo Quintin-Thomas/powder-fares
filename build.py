@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from statistics import median
 
@@ -113,7 +113,7 @@ def main() -> None:
                             "verify": r.get("verify", []), "snow": snow, "season": season.get(r["id"]),
                             "enso": {k: v for k, v in (effects.get(r["id"]) or {}).items() if k != "factor"} or None})
 
-    data = {"generated": datetime.now().isoformat(timespec="minutes"), "season": passes.get("season"),
+    data = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z"), "season": passes.get("season"),
             "passes": passes.get("passes", []), "products": passes.get("products", []),
             "sources": passes.get("sources", []),
             "tickets": load(DATA / "tickets.json", {}).get("prices", {}),
@@ -121,7 +121,7 @@ def main() -> None:
                          "default_exclude": airlines.get("default_exclude", []),
                          "exclude_reasons": airlines.get("exclude_reasons", {})},
             "origins": sorted({p.split("-")[0] for p in routes}), "routes": routes, "resorts": out_resorts,
-            "enso": enso_meta or None}
+            "enso": enso_meta or None, "health": load(STORE / "last_scan.json", None)}
     SITE.mkdir(exist_ok=True)
     (SITE / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     n = sum(len(w) for w in routes.values())

@@ -24,7 +24,10 @@ function start(data) {
   try { const saved = JSON.parse(localStorage.getItem("pf") || "{}"); for (const k in saved) if ($(k)) $(k)[typeof saved[k] === "boolean" ? "checked" : "value"] = saved[k]; } catch (e) {}
   setupAirlines();
   document.querySelectorAll(".controls select, .controls > label input").forEach((el) => el.addEventListener("change", render));
-  $("updated").textContent = `Prices and snow updated ${new Date(D.generated).toLocaleString()}.`;
+  const h = D.health;
+  $("updated").textContent = `Page built ${new Date(D.generated + (/Z$/.test(D.generated) ? "" : "Z")).toLocaleString()}.` + (h
+    ? ` Last flight scan finished ${new Date(h.finished).toLocaleString()}: ${h.ok} of ${h.searched} searches succeeded. ${h.windows_checked_7d} of ${h.windows_total} route-and-date combinations checked in the past 7 days.`
+    : "");
   if (D.enso && D.enso.analogs && D.enso.analogs.length) {
     const yrs = D.enso.analogs.map((y) => `${y}–${String(y + 1).slice(2)}`).join(", ");
     $("enso").innerHTML = `<strong>This winter: ${esc(D.enso.label)}.</strong> ${esc(D.enso.summary)} Historical snow ratings lean on how each mountain did in the ${D.enso.analogs.length} most similar past winters (${yrs}), compared with all winters since 1980. <a href="${esc(D.enso.source)}" target="_blank" rel="noopener">NOAA outlook</a>`;
