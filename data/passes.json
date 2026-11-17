@@ -65,7 +65,39 @@
   "https://www.zrankings.com/ikon-pass",
   "https://www.zrankings.com/epic-pass",
   "https://www.ikonpass.com/en/shop-passes/ikon-base-pass",
-  "https://www.epicpass.com"
+  "https://www.epicpass.com",
+  "https://unofficialnetworks.com/2026/09/10/how-expensive-is-skiing-2026/",
+  "https://www.valleyviewvt.com/vermont-ski-pass-guide/"
  ],
- "verified_on": "2026-11-16"
+ "verified_on": "2026-11-16",
+ "products": [
+  {
+   "id": "ikon_session",
+   "name": "Ikon Session Pass",
+   "brand": "Ikon",
+   "covers": "ikon",
+   "prices": {
+    "2": 369,
+    "3": 509,
+    "4": 639
+   },
+   "note": "2, 3 or 4 days total across Ikon destinations. The 2-day price is published; 3- and 4-day prices are estimates. Some destinations may be excluded."
+  },
+  {
+   "id": "epic_day",
+   "name": "Epic Day Pass (All Resorts)",
+   "brand": "Epic",
+   "covers": "epic",
+   "prices": {
+    "1": 139,
+    "2": 270,
+    "3": 384,
+    "4": 481,
+    "5": 575,
+    "6": 660,
+    "7": 740
+   },
+   "note": "1-7 days at Epic resorts. The 4-day price ($481) is published; other day counts are estimates."
+  }
+ ]
 }

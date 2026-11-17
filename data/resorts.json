@@ -1,5 +1,5 @@
 {
- "_note": "v1 scope: fly-to resorts in the western US and Canada from LA. Coordinates and mid-mountain elevations are approximate (for weather lookups). Access verified against ZRankings 2026-27 lists (Oct 10, 2026); entries in 'verify' still need checking against ikonpass.com/epicpass.com.",
+ "_note": "Scope: fly-to Ikon/Epic resorts in the US and Canada (drive-to SoCal resorts and overseas not included yet). Coordinates and mid-mountain elevations are approximate (for weather lookups). Access verified against ZRankings 2026-27 lists (Oct 10, 2026); entries in 'verify' still need checking against ikonpass.com/epicpass.com.",
  "resorts": [
   {
    "id": "winter-park",
@@ -980,6 +980,882 @@
    "verify": [
     "epic_local"
    ]
+  },
+  {
+   "id": "killington",
+   "name": "Killington",
+   "region": "VT",
+   "lat": 43.626,
+   "lon": -72.797,
+   "elev_m": 900,
+   "airports": [
+    {
+     "code": "BTV",
+     "drive_min": 100
+    },
+    {
+     "code": "ALB",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined with Pico",
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "pico",
+   "name": "Pico Mountain",
+   "region": "VT",
+   "lat": 43.662,
+   "lon": -72.843,
+   "elev_m": 850,
+   "airports": [
+    {
+     "code": "BTV",
+     "drive_min": 95
+    },
+    {
+     "code": "ALB",
+     "drive_min": 125
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined with Killington",
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "sugarbush",
+   "name": "Sugarbush",
+   "region": "VT",
+   "lat": 44.136,
+   "lon": -72.894,
+   "elev_m": 900,
+   "airports": [
+    {
+     "code": "BTV",
+     "drive_min": 50
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "stratton",
+   "name": "Stratton",
+   "region": "VT",
+   "lat": 43.113,
+   "lon": -72.908,
+   "elev_m": 900,
+   "airports": [
+    {
+     "code": "ALB",
+     "drive_min": 100
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "sugarloaf",
+   "name": "Sugarloaf",
+   "region": "ME",
+   "lat": 45.031,
+   "lon": -70.313,
+   "elev_m": 900,
+   "airports": [
+    {
+     "code": "PWM",
+     "drive_min": 150
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "sunday-river",
+   "name": "Sunday River",
+   "region": "ME",
+   "lat": 44.473,
+   "lon": -70.857,
+   "elev_m": 650,
+   "airports": [
+    {
+     "code": "PWM",
+     "drive_min": 80
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "loon",
+   "name": "Loon Mountain",
+   "region": "NH",
+   "lat": 44.036,
+   "lon": -71.621,
+   "elev_m": 650,
+   "airports": [
+    {
+     "code": "MHT",
+     "drive_min": 75
+    },
+    {
+     "code": "BOS",
+     "drive_min": 130
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "tremblant",
+   "name": "Mont Tremblant",
+   "region": "QC",
+   "lat": 46.209,
+   "lon": -74.585,
+   "elev_m": 600,
+   "airports": [
+    {
+     "code": "YUL",
+     "drive_min": 100
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "le-massif",
+   "name": "Le Massif",
+   "region": "QC",
+   "lat": 47.284,
+   "lon": -70.574,
+   "elev_m": 450,
+   "airports": [
+    {
+     "code": "YQB",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "blue-mountain-on",
+   "name": "Blue Mountain",
+   "region": "ON",
+   "lat": 44.501,
+   "lon": -80.316,
+   "elev_m": 350,
+   "airports": [
+    {
+     "code": "YYZ",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "snowshoe",
+   "name": "Snowshoe",
+   "region": "WV",
+   "lat": 38.41,
+   "lon": -79.994,
+   "elev_m": 1350,
+   "airports": [
+    {
+     "code": "CRW",
+     "drive_min": 180
+    },
+    {
+     "code": "PIT",
+     "drive_min": 240
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "camelback",
+   "name": "Camelback",
+   "region": "PA",
+   "lat": 41.052,
+   "lon": -75.355,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "AVP",
+     "drive_min": 50
+    },
+    {
+     "code": "ABE",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "blue-mountain-pa",
+   "name": "Blue Mountain",
+   "region": "PA",
+   "lat": 40.811,
+   "lon": -75.521,
+   "elev_m": 350,
+   "airports": [
+    {
+     "code": "ABE",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "boyne-mountain",
+   "name": "Boyne Mountain",
+   "region": "MI",
+   "lat": 45.164,
+   "lon": -84.931,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "TVC",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "the-highlands",
+   "name": "The Highlands",
+   "region": "MI",
+   "lat": 45.468,
+   "lon": -84.913,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "TVC",
+     "drive_min": 75
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "snowriver",
+   "name": "Snowriver",
+   "region": "MI",
+   "lat": 46.487,
+   "lon": -89.993,
+   "elev_m": 450,
+   "airports": [
+    {
+     "code": "DLH",
+     "drive_min": 150
+    },
+    {
+     "code": "MSP",
+     "drive_min": 330
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "lutsen",
+   "name": "Lutsen Mountains",
+   "region": "MN",
+   "lat": 47.663,
+   "lon": -90.718,
+   "elev_m": 450,
+   "airports": [
+    {
+     "code": "DLH",
+     "drive_min": 100
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "granite-peak",
+   "name": "Granite Peak",
+   "region": "WI",
+   "lat": 44.933,
+   "lon": -89.682,
+   "elev_m": 400,
+   "airports": [
+    {
+     "code": "CWA",
+     "drive_min": 20
+    },
+    {
+     "code": "MSP",
+     "drive_min": 180
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "stowe",
+   "name": "Stowe",
+   "region": "VT",
+   "lat": 44.53,
+   "lon": -72.781,
+   "elev_m": 900,
+   "airports": [
+    {
+     "code": "BTV",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "holiday blackouts"
+   }
+  },
+  {
+   "id": "okemo",
+   "name": "Okemo",
+   "region": "VT",
+   "lat": 43.401,
+   "lon": -72.717,
+   "elev_m": 800,
+   "airports": [
+    {
+     "code": "ALB",
+     "drive_min": 110
+    },
+    {
+     "code": "BTV",
+     "drive_min": 110
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "mount-snow",
+   "name": "Mount Snow",
+   "region": "VT",
+   "lat": 42.96,
+   "lon": -72.92,
+   "elev_m": 800,
+   "airports": [
+    {
+     "code": "ALB",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "hunter",
+   "name": "Hunter Mountain",
+   "region": "NY",
+   "lat": 42.203,
+   "lon": -74.226,
+   "elev_m": 750,
+   "airports": [
+    {
+     "code": "ALB",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "attitash",
+   "name": "Attitash",
+   "region": "NH",
+   "lat": 44.083,
+   "lon": -71.229,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "PWM",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "wildcat",
+   "name": "Wildcat Mountain",
+   "region": "NH",
+   "lat": 44.264,
+   "lon": -71.239,
+   "elev_m": 850,
+   "airports": [
+    {
+     "code": "PWM",
+     "drive_min": 110
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "sunapee",
+   "name": "Mount Sunapee",
+   "region": "NH",
+   "lat": 43.332,
+   "lon": -72.08,
+   "elev_m": 550,
+   "airports": [
+    {
+     "code": "MHT",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "crotched",
+   "name": "Crotched Mountain",
+   "region": "NH",
+   "lat": 42.998,
+   "lon": -71.874,
+   "elev_m": 450,
+   "airports": [
+    {
+     "code": "MHT",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "stoneham",
+   "name": "Stoneham",
+   "region": "QC",
+   "lat": 47.029,
+   "lon": -71.38,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "YQB",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  },
+  {
+   "id": "mont-sainte-anne",
+   "name": "Mont-Sainte-Anne",
+   "region": "QC",
+   "lat": 47.075,
+   "lon": -70.904,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "YQB",
+     "drive_min": 50
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  },
+  {
+   "id": "seven-springs",
+   "name": "Seven Springs",
+   "region": "PA",
+   "lat": 40.023,
+   "lon": -79.297,
+   "elev_m": 850,
+   "airports": [
+    {
+     "code": "PIT",
+     "drive_min": 75
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "hidden-valley-pa",
+   "name": "Hidden Valley",
+   "region": "PA",
+   "lat": 40.06,
+   "lon": -79.262,
+   "elev_m": 800,
+   "airports": [
+    {
+     "code": "PIT",
+     "drive_min": 70
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "laurel",
+   "name": "Laurel Mountain",
+   "region": "PA",
+   "lat": 40.155,
+   "lon": -79.164,
+   "elev_m": 850,
+   "airports": [
+    {
+     "code": "PIT",
+     "drive_min": 70
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "liberty",
+   "name": "Liberty Mountain",
+   "region": "PA",
+   "lat": 39.762,
+   "lon": -77.374,
+   "elev_m": 250,
+   "airports": [
+    {
+     "code": "BWI",
+     "drive_min": 75
+    },
+    {
+     "code": "IAD",
+     "drive_min": 75
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "roundtop",
+   "name": "Roundtop Mountain",
+   "region": "PA",
+   "lat": 40.112,
+   "lon": -76.927,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "BWI",
+     "drive_min": 75
+    },
+    {
+     "code": "MDT",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "whitetail",
+   "name": "Whitetail",
+   "region": "PA",
+   "lat": 39.741,
+   "lon": -77.933,
+   "elev_m": 350,
+   "airports": [
+    {
+     "code": "IAD",
+     "drive_min": 80
+    },
+    {
+     "code": "BWI",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "jack-frost",
+   "name": "Jack Frost",
+   "region": "PA",
+   "lat": 41.107,
+   "lon": -75.651,
+   "elev_m": 550,
+   "airports": [
+    {
+     "code": "AVP",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "big-boulder",
+   "name": "Big Boulder",
+   "region": "PA",
+   "lat": 41.045,
+   "lon": -75.604,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "AVP",
+     "drive_min": 35
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "afton-alps",
+   "name": "Afton Alps",
+   "region": "MN",
+   "lat": 44.856,
+   "lon": -92.787,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "MSP",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "wilmot",
+   "name": "Wilmot Mountain",
+   "region": "WI",
+   "lat": 42.512,
+   "lon": -88.184,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "ORD",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "mt-brighton",
+   "name": "Mt. Brighton",
+   "region": "MI",
+   "lat": 42.54,
+   "lon": -83.818,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "DTW",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "boston-mills",
+   "name": "Boston Mills / Brandywine",
+   "region": "OH",
+   "lat": 41.264,
+   "lon": -81.56,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "CLE",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "alpine-valley-oh",
+   "name": "Alpine Valley",
+   "region": "OH",
+   "lat": 41.531,
+   "lon": -81.255,
+   "elev_m": 350,
+   "airports": [
+    {
+     "code": "CLE",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "mad-river",
+   "name": "Mad River Mountain",
+   "region": "OH",
+   "lat": 40.309,
+   "lon": -83.684,
+   "elev_m": 400,
+   "airports": [
+    {
+     "code": "CMH",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "paoli-peaks",
+   "name": "Paoli Peaks",
+   "region": "IN",
+   "lat": 38.572,
+   "lon": -86.483,
+   "elev_m": 250,
+   "airports": [
+    {
+     "code": "SDF",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "hidden-valley-mo",
+   "name": "Hidden Valley",
+   "region": "MO",
+   "lat": 38.538,
+   "lon": -90.668,
+   "elev_m": 250,
+   "airports": [
+    {
+     "code": "STL",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "snow-creek",
+   "name": "Snow Creek",
+   "region": "MO",
+   "lat": 39.483,
+   "lon": -94.919,
+   "elev_m": 300,
+   "airports": [
+    {
+     "code": "MCI",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
   }
  ]
 }

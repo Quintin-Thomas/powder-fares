@@ -91,7 +91,9 @@ def main() -> None:
                             "verify": r.get("verify", []), "snow": snow, "season": season.get(r["id"])})
 
     data = {"generated": datetime.now().isoformat(timespec="minutes"), "season": passes.get("season"),
-            "passes": passes.get("passes", []), "sources": passes.get("sources", []),
+            "passes": passes.get("passes", []), "products": passes.get("products", []),
+            "sources": passes.get("sources", []),
+            "tickets": load(DATA / "tickets.json", {}).get("prices", {}),
             "airlines": {"fees": airlines.get("board_bag_fee", {}), "default_fee": airlines.get("default_fee", 50),
                          "default_exclude": airlines.get("default_exclude", []),
                          "exclude_reasons": airlines.get("exclude_reasons", {})},

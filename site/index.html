@@ -25,8 +25,8 @@
     </label>
     <label>Month
       <select id="month">
-        <option value="all">Jan – Mar</option><option value="01">January</option>
-        <option value="02">February</option><option value="03">March</option>
+        <option value="all">Jan – Apr</option><option value="01">January</option>
+        <option value="02">February</option><option value="03">March</option><option value="04">April</option>
       </select>
     </label>
     <label>Trip
@@ -43,8 +43,24 @@
     <label class="check"><input type="checkbox" id="nofrontier" checked> Skip Frontier</label>
   </section>
 
-  <p id="summary" class="summary" aria-live="polite"></p>
-  <section id="cards" class="cards"></section>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-find" aria-selected="true">Find trips</button>
+    <button role="tab" id="tab-plan" aria-selected="false">Plan my season · is a pass worth it?</button>
+  </nav>
+
+  <div id="view-find">
+    <p id="summary" class="summary" aria-live="polite"></p>
+    <section id="cards" class="cards"></section>
+  </div>
+
+  <div id="view-plan" hidden>
+    <p class="summary">Add the trips you're thinking about. The planner prices your ski days every possible way (day tickets, each season pass, Ikon Session and Epic Day passes, or an Ikon and an Epic product together) and adds flights and board bags from the latest scan.</p>
+    <section class="panel">
+      <table class="plan" id="trips"><thead><tr><th>Mountain</th><th>Trip dates (flight)</th><th class="num">Ski days</th><th class="num">Day ticket</th><th class="num">Flight</th><th></th></tr></thead><tbody></tbody></table>
+      <button id="add-trip" class="btn">+ Add trip</button>
+    </section>
+    <section id="plan-results"></section>
+  </div>
 </main>
 
 <footer class="wrap foot">
@@ -52,5 +68,6 @@
   <p id="updated"></p>
 </footer>
 <script src="app.js"></script>
+<script src="planner.js"></script>
 </body>
 </html>

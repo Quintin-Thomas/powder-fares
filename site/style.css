@@ -41,3 +41,20 @@ td.num, th.num { text-align: right; }
 a { color: var(--accent); }
 .foot { color: var(--muted); font-size: 13px; padding-top: 24px; padding-bottom: 40px; }
 .empty { color: var(--muted); padding: 30px 0; }
+.tabs { display: flex; gap: 6px; margin: 4px 0 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tabs button { font: inherit; background: none; border: 0; padding: 8px 12px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; overflow-x: auto; }
+.plan select, .plan input { font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; }
+.plan select { min-width: 0; max-width: 240px; }
+.plan input { width: 72px; text-align: right; }
+.btn { font: inherit; margin-top: 10px; background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.icon-btn { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; }
+.result { margin-top: 16px; }
+.result .best { background: var(--card); border: 2px solid var(--good); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.result .best .price { color: var(--good); }
+tr.top td { font-weight: 600; }
+.note { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .plan th:nth-child(4), .plan td:nth-child(4) { display: none; } }
+body[data-view="view-plan"] .controls label:not(.check) { display: none; }
+.steps { margin: 8px 0 6px; padding-left: 20px; } .steps li { margin: 3px 0; }

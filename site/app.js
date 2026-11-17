@@ -12,6 +12,8 @@ fetch("data.json").then((r) => r.json()).then((data) => {
   document.querySelectorAll("select,input").forEach((el) => el.addEventListener("change", render));
   $("updated").textContent = `Prices and snow updated ${new Date(D.generated).toLocaleString()}.`;
   render();
+  window.PF = { D, bestQuote, fmtDate, esc, opts: () => ({ bag: $("bag").checked, nofrontier: $("nofrontier").checked }) };
+  document.dispatchEvent(new Event("pf-ready"));
 });
 
 function bagFee(airlines) {

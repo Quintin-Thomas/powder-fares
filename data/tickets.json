@@ -1,0 +1,480 @@
+{
+ "_note": "Adult 1-day lift ticket, USD, 2026-27. 'typical' = ~75% of the peak window price (what an advance online purchase usually costs). 'cited' peaks come from published 2026-27 prices (Unofficial Networks, SnowBrains, Intski); 'estimate' peaks are by resort size and market. Users can override any price on the site.",
+ "prices": {
+  "winter-park": {
+   "peak_window": 249,
+   "typical": 185,
+   "basis": "estimate"
+  },
+  "copper": {
+   "peak_window": 259,
+   "typical": 195,
+   "basis": "estimate"
+  },
+  "a-basin": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "eldora": {
+   "peak_window": 169,
+   "typical": 125,
+   "basis": "estimate"
+  },
+  "steamboat": {
+   "peak_window": 344,
+   "typical": 260,
+   "basis": "cited"
+  },
+  "snowmass": {
+   "peak_window": 309,
+   "typical": 230,
+   "basis": "cited"
+  },
+  "aspen-mountain": {
+   "peak_window": 309,
+   "typical": 230,
+   "basis": "cited"
+  },
+  "aspen-highlands": {
+   "peak_window": 309,
+   "typical": 230,
+   "basis": "cited"
+  },
+  "vail": {
+   "peak_window": 374,
+   "typical": 280,
+   "basis": "cited"
+  },
+  "beaver-creek": {
+   "peak_window": 392,
+   "typical": 295,
+   "basis": "cited"
+  },
+  "breckenridge": {
+   "peak_window": 332,
+   "typical": 250,
+   "basis": "cited"
+  },
+  "keystone": {
+   "peak_window": 299,
+   "typical": 225,
+   "basis": "estimate"
+  },
+  "crested-butte": {
+   "peak_window": 249,
+   "typical": 185,
+   "basis": "estimate"
+  },
+  "telluride": {
+   "peak_window": 299,
+   "typical": 225,
+   "basis": "estimate"
+  },
+  "alta": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "snowbird": {
+   "peak_window": 229,
+   "typical": 170,
+   "basis": "estimate"
+  },
+  "brighton": {
+   "peak_window": 169,
+   "typical": 125,
+   "basis": "estimate"
+  },
+  "solitude": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "deer-valley": {
+   "peak_window": 349,
+   "typical": 260,
+   "basis": "cited"
+  },
+  "snowbasin": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "park-city": {
+   "peak_window": 369,
+   "typical": 275,
+   "basis": "cited"
+  },
+  "palisades": {
+   "peak_window": 289,
+   "typical": 215,
+   "basis": "cited"
+  },
+  "sierra-at-tahoe": {
+   "peak_window": 159,
+   "typical": 120,
+   "basis": "estimate"
+  },
+  "heavenly": {
+   "peak_window": 299,
+   "typical": 225,
+   "basis": "estimate"
+  },
+  "northstar": {
+   "peak_window": 299,
+   "typical": 225,
+   "basis": "estimate"
+  },
+  "kirkwood": {
+   "peak_window": 249,
+   "typical": 185,
+   "basis": "estimate"
+  },
+  "crystal": {
+   "peak_window": 189,
+   "typical": 140,
+   "basis": "estimate"
+  },
+  "snoqualmie": {
+   "peak_window": 139,
+   "typical": 105,
+   "basis": "estimate"
+  },
+  "stevens-pass": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "mt-bachelor": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "jackson-hole": {
+   "peak_window": 339,
+   "typical": 255,
+   "basis": "cited"
+  },
+  "big-sky": {
+   "peak_window": 289,
+   "typical": 215,
+   "basis": "cited"
+  },
+  "sun-valley": {
+   "peak_window": 239,
+   "typical": 180,
+   "basis": "estimate"
+  },
+  "schweitzer": {
+   "peak_window": 159,
+   "typical": 120,
+   "basis": "estimate"
+  },
+  "taos": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "alyeska": {
+   "peak_window": 149,
+   "typical": 110,
+   "basis": "estimate"
+  },
+  "cypress": {
+   "peak_window": 110,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "whistler": {
+   "peak_window": 220,
+   "typical": 165,
+   "basis": "cited"
+  },
+  "revelstoke": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "sun-peaks": {
+   "peak_window": 139,
+   "typical": 105,
+   "basis": "estimate"
+  },
+  "silver-star": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "red-mountain": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "panorama": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "fernie": {
+   "peak_window": 159,
+   "typical": 120,
+   "basis": "estimate"
+  },
+  "kicking-horse": {
+   "peak_window": 159,
+   "typical": 120,
+   "basis": "estimate"
+  },
+  "kimberley": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "sunshine": {
+   "peak_window": 169,
+   "typical": 125,
+   "basis": "estimate"
+  },
+  "lake-louise": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "norquay": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "nakiska": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "killington": {
+   "peak_window": 239,
+   "typical": 180,
+   "basis": "estimate"
+  },
+  "pico": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "sugarbush": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "stratton": {
+   "peak_window": 219,
+   "typical": 165,
+   "basis": "estimate"
+  },
+  "sugarloaf": {
+   "peak_window": 169,
+   "typical": 125,
+   "basis": "estimate"
+  },
+  "sunday-river": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "loon": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "tremblant": {
+   "peak_window": 159,
+   "typical": 120,
+   "basis": "estimate"
+  },
+  "le-massif": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "blue-mountain-on": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "snowshoe": {
+   "peak_window": 169,
+   "typical": 125,
+   "basis": "estimate"
+  },
+  "camelback": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "blue-mountain-pa": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "boyne-mountain": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "the-highlands": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "snowriver": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "lutsen": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "granite-peak": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "stowe": {
+   "peak_window": 299,
+   "typical": 225,
+   "basis": "estimate"
+  },
+  "okemo": {
+   "peak_window": 219,
+   "typical": 165,
+   "basis": "estimate"
+  },
+  "mount-snow": {
+   "peak_window": 199,
+   "typical": 150,
+   "basis": "estimate"
+  },
+  "hunter": {
+   "peak_window": 179,
+   "typical": 135,
+   "basis": "estimate"
+  },
+  "attitash": {
+   "peak_window": 149,
+   "typical": 110,
+   "basis": "estimate"
+  },
+  "wildcat": {
+   "peak_window": 149,
+   "typical": 110,
+   "basis": "estimate"
+  },
+  "sunapee": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "crotched": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "stoneham": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "mont-sainte-anne": {
+   "peak_window": 109,
+   "typical": 80,
+   "basis": "estimate"
+  },
+  "seven-springs": {
+   "peak_window": 129,
+   "typical": 95,
+   "basis": "estimate"
+  },
+  "hidden-valley-pa": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "laurel": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "liberty": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "roundtop": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "whitetail": {
+   "peak_window": 99,
+   "typical": 75,
+   "basis": "estimate"
+  },
+  "jack-frost": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "big-boulder": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "afton-alps": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "wilmot": {
+   "peak_window": 89,
+   "typical": 65,
+   "basis": "estimate"
+  },
+  "mt-brighton": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "boston-mills": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "alpine-valley-oh": {
+   "peak_window": 69,
+   "typical": 50,
+   "basis": "estimate"
+  },
+  "mad-river": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "paoli-peaks": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "hidden-valley-mo": {
+   "peak_window": 79,
+   "typical": 60,
+   "basis": "estimate"
+  },
+  "snow-creek": {
+   "peak_window": 69,
+   "typical": 50,
+   "basis": "estimate"
+  }
+ }
+}

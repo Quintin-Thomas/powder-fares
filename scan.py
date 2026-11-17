@@ -22,7 +22,9 @@ ROOT = Path(__file__).resolve().parent
 DATA, STORE = ROOT / "data", ROOT / "store"
 CONFIG = {
     "origins": ["LAX", "SNA"],
-    "season": ["2027-01-04", "2027-03-28"],
+    "season": ["2027-01-04", "2027-04-25"],
+    # How often to re-search a window, by days until departure: (max days out, refresh every N days)
+    "refresh": [(30, 2), (75, 4), (10_000, 7)],
     # (depart weekday, nights): Mon-Thu midweek and Thu-Sun weekend trips
     "window_shapes": [(0, 3), (3, 3)],
 }
@@ -63,6 +65,7 @@ def main() -> int:
     ap.add_argument("--budget", type=int, default=300, help="max searches this run")
     ap.add_argument("--origins", default=",".join(CONFIG["origins"]))
     ap.add_argument("--airports", default="", help="comma list to restrict (testing)")
+    ap.add_argument("--dry-run", action="store_true", help="only report what is due")
     args = ap.parse_args()
 
     resorts = json.loads((DATA / "resorts.json").read_text())["resorts"]
@@ -74,9 +77,25 @@ def main() -> int:
 
     state = load(STORE / "scan_state.json", {})
     key = lambda u: f"{u[0]}-{u[1]}|{u[2]}|{u[3]}"  # noqa: E731
-    units.sort(key=lambda u: state.get(key(u), ""))  # never-searched first, then stalest
-    todo = units[: args.budget]
-    log(f"{len(units)} units total, searching {len(todo)}")
+    now = datetime.now()
+
+    def overdue(u) -> float:
+        """How overdue a unit is, as a multiple of its refresh interval (never searched = very overdue)."""
+        last = state.get(key(u))
+        if not last:
+            return 1e6
+        out = (u[2] - today).days
+        every = next(n for limit, n in CONFIG["refresh"] if out <= limit)
+        return (now - datetime.fromisoformat(last)).total_seconds() / 86400 / every
+
+    units.sort(key=overdue, reverse=True)
+    due = [u for u in units if overdue(u) >= 1]
+    todo = due[: args.budget]
+    log(f"{len(units)} units total, {len(due)} due, searching {len(todo)}")
+    if args.dry_run:
+        need = sum(1 / next(n for lim, n in CONFIG["refresh"] if (u[2] - today).days <= lim) for u in units)
+        log(f"steady state needs ~{need:.0f} searches/day")
+        return 0
 
     src = GoogleFlights(pause=1.5, log=log)
     files: dict[str, tuple[dict, dict]] = {}

@@ -6,14 +6,14 @@ A ski-pass trip finder. Choose a pass (Ikon, Ikon Base, Epic, Epic Local) and se
 - **snow outlook**: a 0–100 score for that week, based on 10 past seasons (Open-Meteo), with the 16-day forecast once the dates are in range
 
 ## How it runs
-A GitHub Action runs every morning (`.github/workflows/daily.yml`):
+A GitHub Action runs twice a day (`.github/workflows/daily.yml`):
 1. `snow.py`: builds the snow climatology once, then refreshes this season's base and the 16-day forecast
-2. `scan.py`: searches about 300 of the stalest (origin, airport, date window) combinations and saves the cheapest fare per airline
+2. `scan.py`: searches up to 350 of the most overdue (origin, airport, date window) combinations and saves the cheapest fare per airline. Trips within 30 days are rechecked every 2 days, trips 31–75 days out every 4 days, and later trips weekly. Steady state is about 550 searches a day, and Google's 60-day history fills the days between checks
 3. `build.py`: merges everything into `site/data.json`
 4. commits `store/` and publishes `site/` to GitHub Pages
 
 ## Data
-- `data/resorts.json`: 50 western US and Canadian resorts, with pass access by tier, nearest airports and drive times
+- `data/resorts.json`: 95 fly-to US and Canadian resorts, with pass access by tier, nearest airports and drive times
 - `data/passes.json`: passes, prices and blackout dates (2026-27)
 - `data/airlines.json`: board-bag fees and default exclusions
 - `pricing/`: price-source interface plus the Google Flights implementation, which can be swapped for a paid API
