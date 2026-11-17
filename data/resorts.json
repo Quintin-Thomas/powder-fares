@@ -1,0 +1,985 @@
+{
+ "_note": "v1 scope: fly-to resorts in the western US and Canada from LA. Coordinates and mid-mountain elevations are approximate (for weather lookups). Access verified against ZRankings 2026-27 lists (Oct 10, 2026); entries in 'verify' still need checking against ikonpass.com/epicpass.com.",
+ "resorts": [
+  {
+   "id": "winter-park",
+   "name": "Winter Park",
+   "region": "CO",
+   "lat": 39.886,
+   "lon": -105.764,
+   "elev_m": 3050,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 100
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   }
+  },
+  {
+   "id": "copper",
+   "name": "Copper Mountain",
+   "region": "CO",
+   "lat": 39.502,
+   "lon": -106.151,
+   "elev_m": 3300,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 105
+    },
+    {
+     "code": "EGE",
+     "drive_min": 70
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   }
+  },
+  {
+   "id": "a-basin",
+   "name": "Arapahoe Basin",
+   "region": "CO",
+   "lat": 39.642,
+   "lon": -105.871,
+   "elev_m": 3550,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 95
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   }
+  },
+  {
+   "id": "eldora",
+   "name": "Eldora",
+   "region": "CO",
+   "lat": 39.938,
+   "lon": -105.584,
+   "elev_m": 2950,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 75
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   }
+  },
+  {
+   "id": "steamboat",
+   "name": "Steamboat",
+   "region": "CO",
+   "lat": 40.457,
+   "lon": -106.804,
+   "elev_m": 2750,
+   "airports": [
+    {
+     "code": "HDN",
+     "drive_min": 30
+    },
+    {
+     "code": "DEN",
+     "drive_min": 180
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "snowmass",
+   "name": "Snowmass",
+   "region": "CO",
+   "lat": 39.208,
+   "lon": -106.95,
+   "elev_m": 3100,
+   "airports": [
+    {
+     "code": "ASE",
+     "drive_min": 20
+    },
+    {
+     "code": "EGE",
+     "drive_min": 95
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "aspen-mountain",
+   "name": "Aspen Mountain",
+   "region": "CO",
+   "lat": 39.186,
+   "lon": -106.818,
+   "elev_m": 3100,
+   "airports": [
+    {
+     "code": "ASE",
+     "drive_min": 15
+    },
+    {
+     "code": "EGE",
+     "drive_min": 80
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "aspen-highlands",
+   "name": "Aspen Highlands",
+   "region": "CO",
+   "lat": 39.182,
+   "lon": -106.856,
+   "elev_m": 3150,
+   "airports": [
+    {
+     "code": "ASE",
+     "drive_min": 15
+    },
+    {
+     "code": "EGE",
+     "drive_min": 85
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "vail",
+   "name": "Vail",
+   "region": "CO",
+   "lat": 39.606,
+   "lon": -106.355,
+   "elev_m": 3050,
+   "airports": [
+    {
+     "code": "EGE",
+     "drive_min": 35
+    },
+    {
+     "code": "DEN",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "10 days combined, holiday blackouts"
+   }
+  },
+  {
+   "id": "beaver-creek",
+   "name": "Beaver Creek",
+   "region": "CO",
+   "lat": 39.604,
+   "lon": -106.517,
+   "elev_m": 3050,
+   "airports": [
+    {
+     "code": "EGE",
+     "drive_min": 25
+    },
+    {
+     "code": "DEN",
+     "drive_min": 130
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "10 days combined, holiday blackouts"
+   }
+  },
+  {
+   "id": "breckenridge",
+   "name": "Breckenridge",
+   "region": "CO",
+   "lat": 39.48,
+   "lon": -106.067,
+   "elev_m": 3350,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 110
+    },
+    {
+     "code": "EGE",
+     "drive_min": 80
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "keystone",
+   "name": "Keystone",
+   "region": "CO",
+   "lat": 39.605,
+   "lon": -105.954,
+   "elev_m": 3200,
+   "airports": [
+    {
+     "code": "DEN",
+     "drive_min": 95
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "crested-butte",
+   "name": "Crested Butte",
+   "region": "CO",
+   "lat": 38.899,
+   "lon": -106.965,
+   "elev_m": 3150,
+   "airports": [
+    {
+     "code": "GUC",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "telluride",
+   "name": "Telluride",
+   "region": "CO",
+   "lat": 37.937,
+   "lon": -107.847,
+   "elev_m": 3250,
+   "airports": [
+    {
+     "code": "MTJ",
+     "drive_min": 75
+    },
+    {
+     "code": "TEX",
+     "drive_min": 15
+    }
+   ],
+   "access": {
+    "epic": 7
+   }
+  },
+  {
+   "id": "alta",
+   "name": "Alta",
+   "region": "UT",
+   "lat": 40.588,
+   "lon": -111.638,
+   "elev_m": 2950,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined with Snowbird"
+   }
+  },
+  {
+   "id": "snowbird",
+   "name": "Snowbird",
+   "region": "UT",
+   "lat": 40.581,
+   "lon": -111.657,
+   "elev_m": 2950,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined with Alta",
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "brighton",
+   "name": "Brighton",
+   "region": "UT",
+   "lat": 40.598,
+   "lon": -111.583,
+   "elev_m": 2850,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "solitude",
+   "name": "Solitude",
+   "region": "UT",
+   "lat": 40.62,
+   "lon": -111.592,
+   "elev_m": 2850,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   }
+  },
+  {
+   "id": "deer-valley",
+   "name": "Deer Valley",
+   "region": "UT",
+   "lat": 40.637,
+   "lon": -111.479,
+   "elev_m": 2700,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "snowbasin",
+   "name": "Snowbasin",
+   "region": "UT",
+   "lat": 41.216,
+   "lon": -111.857,
+   "elev_m": 2400,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 55
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "park-city",
+   "name": "Park City",
+   "region": "UT",
+   "lat": 40.651,
+   "lon": -111.508,
+   "elev_m": 2600,
+   "airports": [
+    {
+     "code": "SLC",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "holiday blackouts"
+   }
+  },
+  {
+   "id": "palisades",
+   "name": "Palisades Tahoe",
+   "region": "CA",
+   "lat": 39.197,
+   "lon": -120.235,
+   "elev_m": 2250,
+   "airports": [
+    {
+     "code": "RNO",
+     "drive_min": 50
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited, blackouts"
+   }
+  },
+  {
+   "id": "sierra-at-tahoe",
+   "name": "Sierra-at-Tahoe",
+   "region": "CA",
+   "lat": 38.799,
+   "lon": -120.08,
+   "elev_m": 2250,
+   "airports": [
+    {
+     "code": "RNO",
+     "drive_min": 85
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "heavenly",
+   "name": "Heavenly",
+   "region": "CA",
+   "lat": 38.935,
+   "lon": -119.94,
+   "elev_m": 2700,
+   "airports": [
+    {
+     "code": "RNO",
+     "drive_min": 65
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "holiday blackouts"
+   }
+  },
+  {
+   "id": "northstar",
+   "name": "Northstar",
+   "region": "CA",
+   "lat": 39.274,
+   "lon": -120.121,
+   "elev_m": 2350,
+   "airports": [
+    {
+     "code": "RNO",
+     "drive_min": 45
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "holiday blackouts"
+   }
+  },
+  {
+   "id": "kirkwood",
+   "name": "Kirkwood",
+   "region": "CA",
+   "lat": 38.685,
+   "lon": -120.065,
+   "elev_m": 2550,
+   "airports": [
+    {
+     "code": "RNO",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "holiday blackouts"
+   }
+  },
+  {
+   "id": "crystal",
+   "name": "Crystal Mountain",
+   "region": "WA",
+   "lat": 46.935,
+   "lon": -121.475,
+   "elev_m": 1700,
+   "airports": [
+    {
+     "code": "SEA",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": "unlimited"
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "snoqualmie",
+   "name": "Summit at Snoqualmie",
+   "region": "WA",
+   "lat": 47.424,
+   "lon": -121.414,
+   "elev_m": 1100,
+   "airports": [
+    {
+     "code": "SEA",
+     "drive_min": 55
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "stevens-pass",
+   "name": "Stevens Pass",
+   "region": "WA",
+   "lat": 47.745,
+   "lon": -121.089,
+   "elev_m": 1450,
+   "airports": [
+    {
+     "code": "SEA",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "unlimited"
+   }
+  },
+  {
+   "id": "mt-bachelor",
+   "name": "Mt. Bachelor",
+   "region": "OR",
+   "lat": 43.979,
+   "lon": -121.689,
+   "elev_m": 2200,
+   "airports": [
+    {
+     "code": "RDM",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "jackson-hole",
+   "name": "Jackson Hole",
+   "region": "WY",
+   "lat": 43.587,
+   "lon": -110.828,
+   "elev_m": 2600,
+   "airports": [
+    {
+     "code": "JAC",
+     "drive_min": 25
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "big-sky",
+   "name": "Big Sky",
+   "region": "MT",
+   "lat": 45.286,
+   "lon": -111.401,
+   "elev_m": 2650,
+   "airports": [
+    {
+     "code": "BZN",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "sun-valley",
+   "name": "Sun Valley",
+   "region": "ID",
+   "lat": 43.672,
+   "lon": -114.364,
+   "elev_m": 2300,
+   "airports": [
+    {
+     "code": "SUN",
+     "drive_min": 20
+    },
+    {
+     "code": "BOI",
+     "drive_min": 165
+    }
+   ],
+   "access": {
+    "ikon": 7
+   }
+  },
+  {
+   "id": "schweitzer",
+   "name": "Schweitzer",
+   "region": "ID",
+   "lat": 48.368,
+   "lon": -116.623,
+   "elev_m": 1550,
+   "airports": [
+    {
+     "code": "GEG",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "ikon": "unlimited",
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "taos",
+   "name": "Taos Ski Valley",
+   "region": "NM",
+   "lat": 36.596,
+   "lon": -105.454,
+   "elev_m": 3250,
+   "airports": [
+    {
+     "code": "SAF",
+     "drive_min": 120
+    },
+    {
+     "code": "ABQ",
+     "drive_min": 160
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "alyeska",
+   "name": "Alyeska",
+   "region": "AK",
+   "lat": 60.97,
+   "lon": -149.098,
+   "elev_m": 500,
+   "airports": [
+    {
+     "code": "ANC",
+     "drive_min": 50
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "cypress",
+   "name": "Cypress Mountain",
+   "region": "BC",
+   "lat": 49.396,
+   "lon": -123.204,
+   "elev_m": 1200,
+   "airports": [
+    {
+     "code": "YVR",
+     "drive_min": 40
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "whistler",
+   "name": "Whistler Blackcomb",
+   "region": "BC",
+   "lat": 50.115,
+   "lon": -122.949,
+   "elev_m": 1600,
+   "airports": [
+    {
+     "code": "YVR",
+     "drive_min": 150
+    }
+   ],
+   "access": {
+    "epic": "unlimited",
+    "epic_local": "10 days combined, holiday blackouts"
+   }
+  },
+  {
+   "id": "revelstoke",
+   "name": "Revelstoke",
+   "region": "BC",
+   "lat": 50.958,
+   "lon": -118.163,
+   "elev_m": 1700,
+   "airports": [
+    {
+     "code": "YLW",
+     "drive_min": 150
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "sun-peaks",
+   "name": "Sun Peaks",
+   "region": "BC",
+   "lat": 50.883,
+   "lon": -119.887,
+   "elev_m": 1700,
+   "airports": [
+    {
+     "code": "YKA",
+     "drive_min": 55
+    },
+    {
+     "code": "YLW",
+     "drive_min": 180
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "silver-star",
+   "name": "SilverStar",
+   "region": "BC",
+   "lat": 50.358,
+   "lon": -119.062,
+   "elev_m": 1650,
+   "airports": [
+    {
+     "code": "YLW",
+     "drive_min": 50
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "red-mountain",
+   "name": "RED Mountain",
+   "region": "BC",
+   "lat": 49.103,
+   "lon": -117.819,
+   "elev_m": 1650,
+   "airports": [
+    {
+     "code": "YCG",
+     "drive_min": 35
+    },
+    {
+     "code": "GEG",
+     "drive_min": 150
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "panorama",
+   "name": "Panorama",
+   "region": "BC",
+   "lat": 50.46,
+   "lon": -116.238,
+   "elev_m": 1600,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 210
+    }
+   ],
+   "access": {
+    "ikon": 7,
+    "ikon_base": 5
+   },
+   "verify": [
+    "ikon_base"
+   ]
+  },
+  {
+   "id": "fernie",
+   "name": "Fernie",
+   "region": "BC",
+   "lat": 49.462,
+   "lon": -115.087,
+   "elev_m": 1500,
+   "airports": [
+    {
+     "code": "YXC",
+     "drive_min": 60
+    },
+    {
+     "code": "YYC",
+     "drive_min": 190
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  },
+  {
+   "id": "kicking-horse",
+   "name": "Kicking Horse",
+   "region": "BC",
+   "lat": 51.297,
+   "lon": -117.048,
+   "elev_m": 1800,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 180
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  },
+  {
+   "id": "kimberley",
+   "name": "Kimberley",
+   "region": "BC",
+   "lat": 49.682,
+   "lon": -116.009,
+   "elev_m": 1600,
+   "airports": [
+    {
+     "code": "YXC",
+     "drive_min": 30
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  },
+  {
+   "id": "sunshine",
+   "name": "Sunshine Village",
+   "region": "AB",
+   "lat": 51.078,
+   "lon": -115.782,
+   "elev_m": 2300,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 90
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined SkiBig3",
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "lake-louise",
+   "name": "Lake Louise",
+   "region": "AB",
+   "lat": 51.441,
+   "lon": -116.162,
+   "elev_m": 2100,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 120
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined SkiBig3",
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "norquay",
+   "name": "Mt. Norquay",
+   "region": "AB",
+   "lat": 51.204,
+   "lon": -115.597,
+   "elev_m": 1900,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 80
+    }
+   ],
+   "access": {
+    "ikon": "7 days combined SkiBig3",
+    "ikon_base": 5
+   }
+  },
+  {
+   "id": "nakiska",
+   "name": "Nakiska",
+   "region": "AB",
+   "lat": 50.943,
+   "lon": -115.15,
+   "elev_m": 1900,
+   "airports": [
+    {
+     "code": "YYC",
+     "drive_min": 60
+    }
+   ],
+   "access": {
+    "epic": "7 days combined RCR"
+   },
+   "verify": [
+    "epic_local"
+   ]
+  }
+ ]
+}

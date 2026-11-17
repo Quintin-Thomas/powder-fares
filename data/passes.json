@@ -1,0 +1,71 @@
+{
+ "season": "2026-27",
+ "passes": [
+  {
+   "id": "ikon",
+   "name": "Ikon Pass",
+   "brand": "Ikon",
+   "price_adult": 1529,
+   "blackouts": []
+  },
+  {
+   "id": "ikon_base",
+   "name": "Ikon Base Pass",
+   "brand": "Ikon",
+   "price_adult": 1099,
+   "blackouts": [
+    [
+     "2026-12-26",
+     "2026-12-30"
+    ],
+    [
+     "2027-01-16",
+     "2027-01-17"
+    ],
+    [
+     "2027-02-13",
+     "2027-02-14"
+    ]
+   ]
+  },
+  {
+   "id": "epic",
+   "name": "Epic Pass",
+   "brand": "Epic",
+   "price_adult": 1169,
+   "blackouts": []
+  },
+  {
+   "id": "epic_local",
+   "name": "Epic Local Pass",
+   "brand": "Epic",
+   "price_adult": 869,
+   "blackouts": [
+    [
+     "2026-11-27",
+     "2026-11-28"
+    ],
+    [
+     "2026-12-26",
+     "2026-12-31"
+    ],
+    [
+     "2027-01-16",
+     "2027-01-16"
+    ],
+    [
+     "2027-02-13",
+     "2027-02-14"
+    ]
+   ],
+   "blackout_note": "Holiday blackouts apply only at resorts marked 'holiday blackouts'."
+  }
+ ],
+ "sources": [
+  "https://www.zrankings.com/ikon-pass",
+  "https://www.zrankings.com/epic-pass",
+  "https://www.ikonpass.com/en/shop-passes/ikon-base-pass",
+  "https://www.epicpass.com"
+ ],
+ "verified_on": "2026-11-16"
+}

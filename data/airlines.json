@@ -1,0 +1,11 @@
+{
+  "_note": "USD, one way, one checked ski/snowboard bag, prepaid online. Researched 2026-11-16 from airline pages and 2026 fee roundups; confirm before booking.",
+  "board_bag_fee": {
+    "Southwest": 45, "Delta": 45, "United": 45, "American": 45, "Alaska": 45,
+    "Air Canada": 45, "WestJet": 50, "Flair Airlines": 85, "Spirit": 65, "Frontier": 75,
+    "Breeze": 50, "Sun Country": 50, "Avelo": 50, "Allegiant": 60, "Hawaiian": 45, "Aeromexico": 45
+  },
+  "default_fee": 50,
+  "default_exclude": ["Frontier"],
+  "exclude_reasons": {"Frontier": "Unclear sports-equipment rules; listed fares often far below the real cost with a board bag."}
+}

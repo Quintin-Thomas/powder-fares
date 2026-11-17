@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Powder Fares</title>
+<meta name="description" content="Ski pass trip finder: real flight costs from Los Angeles (snowboard bag included), buy timing, and snow outlook for every Ikon and Epic mountain.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Powder Fares</h1>
+    <p class="lede">Pick your pass. See what it really costs to fly to every mountain on it from LA, with your board bag included, plus how the snow usually looks that week.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls" aria-label="Filters">
+    <label>Pass
+      <select id="pass"></select>
+    </label>
+    <label>From
+      <select id="origin"><option value="any">LAX or SNA</option></select>
+    </label>
+    <label>Month
+      <select id="month">
+        <option value="all">Jan – Mar</option><option value="01">January</option>
+        <option value="02">February</option><option value="03">March</option>
+      </select>
+    </label>
+    <label>Trip
+      <select id="shape">
+        <option value="any">Any</option><option value="0">Mon–Thu (midweek)</option><option value="3">Thu–Sun (weekend)</option>
+      </select>
+    </label>
+    <label>Sort
+      <select id="sort">
+        <option value="value">Best value</option><option value="price">Cheapest</option><option value="snow">Best snow</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="bag" checked> Board bag</label>
+    <label class="check"><input type="checkbox" id="nofrontier" checked> Skip Frontier</label>
+  </section>
+
+  <p id="summary" class="summary" aria-live="polite"></p>
+  <section id="cards" class="cards"></section>
+</main>
+
+<footer class="wrap foot">
+  <p><strong>Estimates, not quotes.</strong> Fares are read from Google Flights searches (round trip, 1 adult, economy) and can change at any time. Board-bag fees are typical 2026 prepaid prices per direction. Check the airline before you book. The snow score compares typical conditions for that week across all mountains, using 10 past seasons of Open-Meteo data. It isn't a forecast unless it's marked "forecast". Pass access is based on published 2026-27 lists. Confirm at ikonpass.com or epicpass.com.</p>
+  <p id="updated"></p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
