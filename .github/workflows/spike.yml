@@ -1,0 +1,18 @@
+name: Phase 0 - Google Flights reachability
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["spike.py", "pricing/**", ".github/workflows/spike.yml"]
+
+jobs:
+  spike:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+      - run: python spike.py

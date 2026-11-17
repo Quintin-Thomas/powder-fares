@@ -1,0 +1,77 @@
+"""Google Flights price source (unofficial: reads the public results page via fast-flights).
+
+Fixes over plain fast-flights:
+- merges Google's "top flights" block, which fast-flights skips and which often holds the cheapest fare
+- returns Google's price insights: typical range and ~60 days of daily price history
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import time
+from datetime import date, datetime
+
+from fast_flights import FlightQuery, Passengers, create_query, fetch_flights_html
+from fast_flights.parser import parse_js
+from selectolax.lexbor import LexborHTMLParser
+
+from .source import Itinerary, Quote, SearchResult
+
+
+class GoogleFlights:
+    name = "google"
+
+    def __init__(self, currency: str = "USD", pause: float = 2.0, attempts: int = 3, log=print):
+        self.currency, self.pause, self.attempts, self.log = currency, pause, attempts, log
+        self.proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+
+    def _query(self, it: Itinerary):
+        legs = [FlightQuery(date=it.depart.isoformat(), from_airport=it.origin, to_airport=it.dest)]
+        if it.ret:
+            legs.append(FlightQuery(date=it.ret.isoformat(), from_airport=it.dest, to_airport=it.origin))
+        return create_query(flights=legs, trip="round-trip" if it.ret else "one-way",
+                            seat="economy", passengers=Passengers(adults=1),
+                            currency=self.currency, language="en")
+
+    def search(self, it: Itinerary) -> SearchResult | None:
+        q = self._query(it)
+        for i in range(self.attempts):
+            try:
+                html = fetch_flights_html(q, proxy=self.proxy)
+                node = LexborHTMLParser(html).css_first(r"script.ds\:1")
+                if node is None:
+                    raise ValueError("no results block (blocked, consent page, or layout change)")
+                payload = json.loads(node.text().split("data:", 1)[1].rsplit(",", 1)[0])
+                merged = [*((payload[2] or [[]])[0] or []), *((payload[3] or [[]])[0] or [])]
+                payload[3] = [merged or None, *(payload[3] or [None])[1:]]
+                flights = parse_js("data:" + json.dumps(payload) + ",0")
+                quotes = [Quote(price=f.price, airlines=list(f.airlines), stops=len(f.flights) - 1)
+                          for f in flights if f.price and f.price > 0]
+                time.sleep(self.pause)
+                return SearchResult(itinerary=it, quotes=quotes, url=q.url(), **_insights(payload))
+            except Exception as e:  # network hiccups, throttling, page changes
+                self.log(f"  {it.key()} attempt {i + 1} failed: {type(e).__name__}: {e}")
+                time.sleep(5 * (i + 1))
+        return None
+
+
+def _insights(payload) -> dict:
+    """Google's price-insight block (payload[5]); field meanings inferred from live pages."""
+    try:
+        ins = payload[5]
+        history = {datetime.fromtimestamp(ms / 1000).date().isoformat(): int(p)
+                   for ms, p in (ins[10][0] if len(ins) > 10 and ins[10] else [])}
+        return {"typical_low": ins[4][1], "typical_high": ins[5][1], "typical": ins[2][1], "history": history}
+    except (TypeError, IndexError, KeyError):
+        return {"typical_low": None, "typical_high": None, "typical": None, "history": {}}
+
+
+def _demo() -> None:
+    src = GoogleFlights()
+    r = src.search(Itinerary("LAX", "DEN", date(2027, 1, 25), date(2027, 1, 28)))
+    print(r and (r.cheapest().price, r.typical_low, r.typical_high, len(r.history)))
+
+
+if __name__ == "__main__":
+    _demo()
