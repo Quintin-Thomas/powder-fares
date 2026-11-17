@@ -35,6 +35,18 @@
   }
 
   const resortById = (id) => D.resorts.find((r) => r.id === id);
+  // Ski dates for a trip: start on arrival day or the day after (default), never past the return flight day.
+  function skiDatesISO(t) {
+    const [dep, ret] = t.win.split("|");
+    const out = [];
+    for (let k = 0; k < t.days; k++) {
+      const d = addDays(dep, k + (t.first === "0" ? 0 : 1));
+      if (d > ret) break;
+      out.push(d);
+    }
+    return out;
+  }
+  const skiDates = (t) => skiDatesISO(t).map((d) => PF.fmtDate(d).replace(/^\w+, /, ""));
   const ticket = (id) => ticketOverride[id] ?? D.tickets[id]?.typical ?? 150;
 
   function flightOptions(r) {
@@ -68,7 +80,9 @@
       return `<tr>
         <td><select data-i="${i}" data-f="resort">${resortSelect(t.resort)}</select></td>
         <td>${winSel}</td>
-        <td class="num"><input type="number" min="1" max="60" value="${t.days}" data-i="${i}" data-f="days"></td>
+        <td class="num"><input type="number" min="1" max="60" value="${t.days}" data-i="${i}" data-f="days">
+          ${t.win ? `<select data-i="${i}" data-f="first" title="Blackout checks use these exact ski dates"><option value="1" ${t.first !== "0" ? "selected" : ""}>from day after arrival</option><option value="0" ${t.first === "0" ? "selected" : ""}>from arrival day</option></select>` : ""}
+          ${t.win ? `<div class="note">${skiDates(t).join(", ")}${skiDates(t).length < t.days ? ` <span class="stale">(only ${skiDates(t).length} ski day${skiDates(t).length === 1 ? "" : "s"} fit before your return flight)</span>` : ""}</div>` : ""}</td>
         <td class="num">${r ? `<input type="number" min="0" value="${ticket(r.id)}" data-tk="${r.id}" title="${D.tickets[r.id]?.basis === "cited" ? "From published 2026-27 prices" : "Estimate"}; edit to use your own price">` : ""}</td>
         <td class="num">${chosen ? `<a href="${PF.esc(chosen.url)}" target="_blank" rel="noopener">$${chosen.q.total}</a>` : "–"}</td>
         <td><button class="icon-btn" data-del="${i}" aria-label="Remove trip">×</button></td></tr>`;
@@ -152,7 +166,7 @@
       if (seasonBest && seasonBest !== best) save += `, and <strong>${$$(seasonBest.cost - best.cost)}</strong> compared with the best season-pass option (${PF.esc(name(seasonBest))}, ${$$(seasonBest.cost)})`;
       save += ".";
     }
-    const trip = flights ? `With flights${PF.opts().bag ? " and board bags" : ""}, your whole season comes to about <strong>${$$(best.cost + flights)}</strong>.` : "";
+    const trip = flights ? `Estimated lift access + flights${PF.opts().bag ? " (with board bags)" : ""}: about <strong>${$$(best.cost + flights)}</strong>. Lodging, ground transport and meals aren't included.` : "";
     return `<div class="best">
       <div class="meta">The cheapest way to ski your ${days}</div>
       <div class="row"><span class="price">${$$(best.cost)}</span><span class="break">in lift costs</span></div>
@@ -189,8 +203,8 @@
     for (const { t, r } of planned) {
       const fl = t.win ? flightOptions(r).find((x) => x.wk === t.win) : null;
       if (fl) flights += fl.q.total;
-      const start = t.win ? t.win.split("|")[0] : null;
-      for (let k = 0; k < t.days; k++) skiDays.push({ r, price: ticket(r.id), date: start ? addDays(start, Math.min(k + (t.days > 1 ? 0 : 1), 60)) : "" });
+      const dates = t.win ? skiDatesISO(t) : Array(t.days).fill("");
+      for (const date of dates) skiDays.push({ r, price: ticket(r.id), date });
     }
     skiDays.sort((a, b) => b.price - a.price);
     const scored = options().map((o) => ({ ...o, ...price(skiDays, o.ikon, o.epic) })).sort((a, b) => a.cost - b.cost);
@@ -206,7 +220,7 @@
     $("plan-results").innerHTML = `<div class="result">
       ${advice(best, base, scored, totalDays, flights, name)}
       <table><thead><tr><th>Option · what covers which days</th><th class="num">Lift cost</th><th class="num">vs tickets</th><th class="num">+ flights</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="note">Lift cost = pass price + any day tickets the pass doesn't cover (day limits, blackouts, or mountains not on that pass). Day-ticket prices are typical advance online prices (estimates unless marked as published), and you can edit them. Ikon Session 3/4-day and most Epic Day prices are estimates. Assumes adult prices and that ski days start on the trip's first day.</p>
+      <p class="note">Lift cost = pass price + any day tickets the pass doesn't cover (day limits, blackouts, or mountains not on that pass). Day-ticket prices are typical advance online prices (estimates unless marked as published), and you can edit them. Ikon Session 3/4-day and most Epic Day prices are estimates. <strong>Limits:</strong> adult prices; Ikon Session and Epic Day passes are treated as valid at every Ikon or Epic resort in our list (some products exclude certain resorts or dates, so confirm before buying); lodging, ground transport and meals aren't included. Blackouts are checked against the ski dates shown for each trip.</p>
     </div>`;
   }
 })();

@@ -35,6 +35,7 @@ jobs:
       - name: Snow (climate once, then season + 16-day forecast)
         run: python snow.py
         continue-on-error: true
+        timeout-minutes: 15
       - name: Flight scan
         run: python scan.py --budget "${{ github.event_name == 'push' && '0' || github.event.inputs.budget || '350' }}"
       - name: Build page data

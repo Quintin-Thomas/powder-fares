@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from pricing import GoogleFlights, Itinerary
@@ -77,7 +77,7 @@ def main() -> int:
 
     state = load(STORE / "scan_state.json", {})
     key = lambda u: f"{u[0]}-{u[1]}|{u[2]}|{u[3]}"  # noqa: E731
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
 
     def overdue(u) -> float:
         """How overdue a unit is, as a multiple of its refresh interval (never searched = very overdue)."""
@@ -86,7 +86,10 @@ def main() -> int:
             return 1e6
         out = (u[2] - today).days
         every = next(n for limit, n in CONFIG["refresh"] if out <= limit)
-        return (now - datetime.fromisoformat(last)).total_seconds() / 86400 / every
+        t = datetime.fromisoformat(last.replace("Z", "+00:00"))
+        if t.tzinfo is None:  # older entries were saved without a zone
+            t = t.replace(tzinfo=timezone.utc)
+        return (now - t).total_seconds() / 86400 / every
 
     units.sort(key=overdue, reverse=True)
     due = [u for u in units if overdue(u) >= 1]
@@ -107,7 +110,7 @@ def main() -> int:
         quotes, history = files[pair]
         wkey = f"{d}|{r}"
         res = src.search(Itinerary(o, a, d, r))
-        state[key((o, a, d, r))] = datetime.now().isoformat(timespec="minutes")
+        state[key((o, a, d, r))] = datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z")
         if res is None:
             fail += 1
             continue

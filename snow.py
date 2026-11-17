@@ -28,15 +28,24 @@ SEASONS = range(2015, 2025)  # 2015-16 ... 2024-25
 GOOD_BASE_M = 0.75           # base depth that counts as reliably good coverage
 
 
+class RateLimited(RuntimeError):
+    """Open-Meteo said 'too many requests' — stop for this run and pick up next time."""
+
+
 def get(url: str, params: dict, tries: int = 3) -> dict:
+    import urllib.error
     full = url + "?" + urllib.parse.urlencode(params)
     for i in range(tries):
         try:
             with urllib.request.urlopen(full, timeout=60) as r:
                 return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                raise RateLimited(f"Open-Meteo rate limit: {e.read()[:200]!r}") from None
+            print(f"  retry {i + 1}: {e}")
         except Exception as e:
             print(f"  retry {i + 1}: {e}")
-            time.sleep(5 * (i + 1))
+        time.sleep(5 * (i + 1))
     raise RuntimeError(f"failed: {full}")
 
 
@@ -142,6 +151,7 @@ def main() -> None:
     ap.add_argument("--skip-forecast", action="store_true")
     ap.add_argument("--out", default=str(OUT), help="output folder (testing)")
     ap.add_argument("--winters-per-run", type=int, default=12, help="resorts to backfill 45-winter history for")
+    ap.add_argument("--climate-per-run", type=int, default=15, help="resorts to backfill 10-season climatology for")
     args = ap.parse_args()
     out = Path(args.out)
 
@@ -152,11 +162,22 @@ def main() -> None:
     clim_path = out / "climate.json"
     clim = json.loads(clim_path.read_text()) if clim_path.exists() else {}
 
-    for r in resorts:
-        if args.refresh_climate or r["id"] not in clim:
-            print(f"climate {r['id']}")
+    # Daily-critical first: today's snow on the ground + 16-day forecast (cheap: 1 request per resort).
+    if not args.skip_forecast:
+        forecast_and_season(resorts, clim, out)
+
+    # Then backfill the 10-season climatology for resorts that don't have it yet, a batch per run,
+    # stopping early if Open-Meteo rate-limits us (the rest continues next run).
+    todo = [r for r in resorts if args.refresh_climate or r["id"] not in clim][: args.climate_per_run]
+    for r in todo:
+        print(f"climate {r['id']}")
+        try:
             clim[r["id"]] = climate(r)
-            time.sleep(1)
+        except RuntimeError as e:
+            print(f"  stopped ({e}); will continue next run")
+            break
+        clim_path.write_text(json.dumps(clim, separators=(",", ":")))  # save progress as we go
+        time.sleep(1)
     clim_path.write_text(json.dumps(clim, separators=(",", ":")))
 
     # Dec-Mar snowfall for every winter since 1980, so El Niño / La Niña winters can be
@@ -188,14 +209,22 @@ def main() -> None:
             break
     w_path.write_text(json.dumps(winters, separators=(",", ":")))
     (out / "enso_meta.json").write_text(json.dumps({**cur, "analogs": analogs}, indent=1))
+    print(f"snow done: {len(clim)}/{len(resorts)} climate, {len(winters)}/{len(resorts)} winter histories")
 
-    if args.skip_forecast:
-        return
+
+def forecast_and_season(resorts: list[dict], clim: dict, out: Path) -> None:
+    """Today's snow depth vs normal, and the 16-day forecast. Keeps the previous values for any
+    resort we couldn't refresh this run, so a rate limit never blanks the site."""
+    s_path, f_path = out / "season.json", out / "forecast.json"
+    season = json.loads(s_path.read_text()) if s_path.exists() else {}
+    fc = json.loads(f_path.read_text()) if f_path.exists() else {}
     today = date.today().isoformat()
-    season, fc = {}, {}
     for r in resorts:
         try:
             days = recent_and_forecast(r)
+        except RateLimited as e:
+            print(f"forecast stopped at {r['id']}: {e}")
+            break
         except RuntimeError as e:
             print(f"forecast {r['id']} failed: {e}")
             continue
@@ -206,9 +235,9 @@ def main() -> None:
                            "normal_m": normal[0] if normal else None,
                            "snow_7d_cm": round(sum(v[0] for k, v in days.items() if k <= today), 1)}
         time.sleep(0.5)
-    (out / "season.json").write_text(json.dumps(season, separators=(",", ":")))
-    (out / "forecast.json").write_text(json.dumps(fc, separators=(",", ":")))
-    print(f"snow done: {len(clim)} climate, {len(season)} season/forecast")
+    s_path.write_text(json.dumps(season, separators=(",", ":")))
+    f_path.write_text(json.dumps(fc, separators=(",", ":")))
+    print(f"forecast/season: {len(season)} resorts")
 
 
 if __name__ == "__main__":

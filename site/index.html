@@ -47,6 +47,7 @@
     </details>
   </section>
 
+  <p id="sort-help" class="sort-help"></p>
   <nav class="tabs" role="tablist">
     <button role="tab" id="tab-find" aria-selected="true">Find trips</button>
     <button role="tab" id="tab-plan" aria-selected="false">Plan my season · is a pass worth it?</button>
@@ -60,7 +61,7 @@
   <div id="view-plan" hidden>
     <p class="summary">Add the trips you're thinking about. The planner prices your ski days every possible way (day tickets, each season pass, Ikon Session and Epic Day passes, or an Ikon and an Epic product together) and adds flights and board bags from the latest scan.</p>
     <section class="panel">
-      <table class="plan" id="trips"><thead><tr><th>Mountain</th><th>Trip dates (flight)</th><th class="num">Ski days</th><th class="num">Day ticket</th><th class="num">Flight</th><th></th></tr></thead><tbody></tbody></table>
+      <table class="plan" id="trips"><thead><tr><th>Mountain</th><th>Trip dates (flight)</th><th class="num">Ski days (dates used)</th><th class="num">Day ticket</th><th class="num">Flight</th><th></th></tr></thead><tbody></tbody></table>
       <button id="add-trip" class="btn">+ Add trip</button>
     </section>
     <section id="plan-results"></section>
@@ -68,7 +69,7 @@
 </main>
 
 <footer class="wrap foot">
-  <p><strong>Estimates, not quotes.</strong> Fares are read from Google Flights searches (round trip, 1 adult, economy) and can change at any time. Board-bag fees are typical 2026 prepaid prices per direction. Check the airline before you book. The snow score compares typical conditions for that week across all mountains, using 10 past seasons of Open-Meteo data. It isn't a forecast unless it's marked "forecast". Pass access is based on published 2026-27 lists. Confirm at ikonpass.com or epicpass.com.</p>
+  <p><strong>Estimates, not quotes.</strong> Fares are read from Google Flights searches (round trip, 1 adult, economy) and can change at any time. Board-bag fees are typical 2026 prepaid prices per direction. Check the airline before you book. The historical snow rating (A–F) compares typical conditions for that week across all mountains, using 10 past winters of Open-Meteo data adjusted for this winter's El Niño/La Niña outlook. It is not a forecast. A 16-day forecast appears separately, labeled "Forecast", once your dates are close enough. Pass access is based on published 2026-27 lists. Confirm at ikonpass.com or epicpass.com.</p>
   <p id="updated"></p>
 </footer>
 <script src="app.js"></script>
