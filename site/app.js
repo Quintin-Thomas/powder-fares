@@ -11,7 +11,7 @@ function loadData() {
     .then(start)
     .catch((e) => {
       $("summary").textContent = "";
-      $("cards").innerHTML = `<div class="error"><strong>Couldn't load trip data.</strong> ${esc(e.message)}. Check your connection and <button class="btn" id="retry">Try again</button></div>`;
+      $("cards").innerHTML = `<div class="error" role="alert"><strong>Couldn't load trip data.</strong> ${esc(e.message)}. Check your connection, then try again.<div><button class="btn" id="retry">Try again</button></div></div>`;
       $("retry").addEventListener("click", loadData);
     });
 }
@@ -26,14 +26,17 @@ function start(data) {
   syncShape(saved.shape);
   $("kind").addEventListener("change", () => syncShape());
   setupAirlines();
-  document.querySelectorAll(".controls select, .controls > label input").forEach((el) => el.addEventListener("change", render));
+  // Same controls as before (every filter select + the board-bag box); airline boxes have their own handler.
+  document.querySelectorAll(".controls select, #bag").forEach((el) => el.addEventListener("change", render));
   const h = D.health;
   $("updated").textContent = `Page built ${new Date(D.generated + (/Z$/.test(D.generated) ? "" : "Z")).toLocaleString()}.` + (h
     ? ` Last flight scan finished ${new Date(h.finished).toLocaleString()}: ${h.ok} of ${h.searched} searches succeeded. ${h.windows_checked_7d} of ${h.windows_total} route-and-date combinations checked in the past 7 days.`
     : "");
   if (D.enso && D.enso.analogs && D.enso.analogs.length) {
     const yrs = D.enso.analogs.map((y) => `${y}–${String(y + 1).slice(2)}`).join(", ");
-    $("enso").innerHTML = `<strong>This winter: ${esc(D.enso.label)}.</strong> ${esc(D.enso.summary)} Historical snow ratings lean on how each mountain did in the ${D.enso.analogs.length} most similar past winters (${yrs}), compared with all winters since 1980. <a href="${esc(D.enso.source)}" target="_blank" rel="noopener">NOAA outlook</a>`;
+    // One line by default; the full NOAA summary and method sit behind "Details" (same text as before).
+    $("enso").innerHTML = `<details><summary><strong>This winter: ${esc(D.enso.label)}.</strong> <span>Snow ratings account for it.</span> <span class="more">Details</span></summary>
+      <p>${esc(D.enso.summary)} Historical snow ratings lean on how each mountain did in the ${D.enso.analogs.length} most similar past winters (${yrs}), compared with all winters since 1980. <a href="${esc(D.enso.source)}" target="_blank" rel="noopener">NOAA outlook<span class="sr-only"> (opens in a new tab)</span></a></p></details>`;
     $("enso").hidden = false;
   }
   render();
@@ -78,6 +81,10 @@ function setupAirlines() {
     sync(); render(); document.dispatchEvent(new Event("pf-filters"));
   });
   document.addEventListener("click", (e) => { if (!$("airlines").contains(e.target)) $("airlines").open = false; });
+  // Escape closes the picker and puts focus back on its toggle.
+  $("airlines").addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && $("airlines").open) { $("airlines").open = false; $("airline-summary").focus(); }
+  });
   sync();
 }
 
@@ -90,9 +97,10 @@ function grade(snow) {
 }
 function gradeBadge(snow, small) {
   const g = grade(snow);
-  if (!g) return `<span class="grade">–</span>`;
+  if (!g) return `<span class="grade" role="img" aria-label="Snow grade not available">–</span>`;
   const tip = `${g.word}: better than ${snow.score}% of mountain-weeks we track. Based on the usual base depth and fresh snow that week${snow.forecast_fresh != null ? " plus the 16-day forecast" : ""}.`;
-  return `<span class="grade g-${g.letter}${small ? " sm" : ""}" title="${esc(tip)}">${g.letter}</span>${small ? "" : ` ${g.word}`}`;
+  // The spoken label carries the meaning; the letter stays visible, colour is only a reinforcement.
+  return `<span class="grade g-${g.letter}${small ? " sm" : ""}" role="img" aria-label="Snow grade ${g.letter}, ${g.word}" title="${esc(tip)}">${g.letter}</span>${small ? "" : ` ${g.word}`}`;
 }
 
 function bestQuote(win, opts) {
@@ -162,7 +170,8 @@ function render() {
     ? `${cards.length} mountains on the ${pass.name} with flights found${opts.bag ? ", board bag included" : ""}.`
     : "";
   $("cards").innerHTML = cards.length ? cards.map((c) => card(c, pass)).join("")
-    : `<p class="empty">No flights scanned yet for this filter. Scans rotate through every airport over a few days.</p>`;
+    : `<div class="empty"><strong>No trips match these filters.</strong>
+        <p class="hint">${EXCLUDE.size ? `You're excluding ${EXCLUDE.size} airline${EXCLUDE.size > 1 ? "s" : ""} (${esc([...EXCLUDE].join(", "))}), which can hide flights. ` : ""}Try another month or trip length, or check back later: flight scans rotate through every airport over a few days.</p></div>`;
 }
 
 function card(c, pass) {

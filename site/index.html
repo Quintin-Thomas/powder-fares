@@ -3,65 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#152338" media="(prefers-color-scheme: dark)">
 <title>Powder Fares</title>
 <meta name="description" content="Ski pass trip finder: real flight costs from Los Angeles (snowboard bag included), buy timing, and snow outlook for every Ikon and Epic mountain.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip" href="#content">Skip to results</a>
 <header class="top">
   <div class="wrap">
     <h1>Powder Fares</h1>
-    <p class="lede">Pick your pass. See what it really costs to fly to every mountain on it from LA, with your board bag included, plus how the snow usually looks that week.</p>
-    <p id="enso" class="enso" hidden></p>
+    <p class="lede">Flights, ski passes, and snow conditions—compared in one place.</p>
+    <div id="enso" class="enso" hidden></div>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="controls" aria-label="Filters">
-    <label class="find-only">Trip type
-      <select id="kind"><option value="single">Single mountain</option><option value="multi">Multi-mountain</option></select>
-    </label>
-    <label class="find-only">Pass
-      <select id="pass"></select>
-    </label>
-    <label>From
-      <select id="origin"><option value="any">LAX or SNA</option></select>
-    </label>
-    <label class="find-only">Month
-      <select id="month">
-        <option value="all">Jan – Apr</option><option value="01">January</option>
-        <option value="02">February</option><option value="03">March</option><option value="04">April</option>
-      </select>
-    </label>
-    <label class="find-only">Trip
-      <select id="shape">
-        <option value="any">Any</option><option value="0">Mon–Thu (midweek)</option><option value="3">Thu–Sun (weekend)</option>
-      </select>
-    </label>
-    <label class="find-only">Sort
-      <select id="sort">
-        <option value="value">Best value</option><option value="price">Cheapest</option><option value="snow">Best snow</option>
-      </select>
-    </label>
-    <label class="check"><input type="checkbox" id="bag" checked> Board bag</label>
-    <details class="airlines" id="airlines">
-      <summary id="airline-summary">Exclude airlines</summary>
-      <div class="airline-list" id="airline-list"></div>
-    </details>
-  </section>
-
-  <p id="sort-help" class="sort-help"></p>
-  <nav class="tabs" role="tablist">
-    <button role="tab" id="tab-find" aria-selected="true">Find trips</button>
-    <button role="tab" id="tab-plan" aria-selected="false">Plan my season · is a pass worth it?</button>
-  </nav>
-
-  <div id="view-find">
-    <p id="summary" class="summary" aria-live="polite"></p>
-    <section id="cards" class="cards"></section>
+  <div class="tabs" role="tablist" aria-label="Powder Fares sections">
+    <button role="tab" id="tab-find" aria-selected="true" aria-controls="view-find" tabindex="0">Find trips</button>
+    <button role="tab" id="tab-plan" aria-selected="false" aria-controls="view-plan" tabindex="-1">Plan my season</button>
   </div>
 
-  <div id="view-plan" hidden>
+  <section class="controls" aria-label="Trip filters">
+    <div class="filters-primary">
+      <label class="find-only">Trip type
+        <select id="kind"><option value="single">Single mountain</option><option value="multi">Multi-mountain</option></select>
+      </label>
+      <label class="find-only">Pass
+        <select id="pass"></select>
+      </label>
+      <label>From
+        <select id="origin"><option value="any">LAX or SNA</option></select>
+      </label>
+      <label class="find-only">Month
+        <select id="month">
+          <option value="all">Jan – Apr</option><option value="01">January</option>
+          <option value="02">February</option><option value="03">March</option><option value="04">April</option>
+        </select>
+      </label>
+      <label class="find-only">Trip length
+        <select id="shape">
+          <option value="any">Any</option><option value="0">Mon–Thu (midweek)</option><option value="3">Thu–Sun (weekend)</option>
+        </select>
+      </label>
+      <label class="find-only">Sort
+        <select id="sort" aria-describedby="sort-help">
+          <option value="value">Best value</option><option value="price">Cheapest</option><option value="snow">Best snow</option>
+        </select>
+      </label>
+    </div>
+    <div class="filters-secondary">
+      <label class="check"><input type="checkbox" id="bag" checked> Board bag</label>
+      <details class="airlines" id="airlines">
+        <summary id="airline-summary">Exclude airlines</summary>
+        <div class="airline-list" id="airline-list"></div>
+      </details>
+      <details class="how-ranking find-only">
+        <summary>How ranking works</summary>
+        <p id="sort-help" class="sort-help"></p>
+      </details>
+    </div>
+  </section>
+
+  <div id="content" tabindex="-1">
+  <div id="view-find" role="tabpanel" aria-labelledby="tab-find">
+    <p id="summary" class="summary" aria-live="polite"></p>
+    <section id="cards" class="cards" aria-label="Trip results"></section>
+  </div>
+
+  <div id="view-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+    <p class="view-intro">Is a pass worth it? Let us suggest a season plan, or enter the trips you already have in mind.</p>
     <div class="choices" role="group" aria-label="How do you want to plan?">
       <button class="choice" id="mode-quiz" aria-pressed="false"><strong>Help me plan</strong><span>5 quick questions. We'll suggest trips, dates and the cheapest way to pay for lifts.</span></button>
       <button class="choice" id="mode-manual" aria-pressed="false"><strong>I know my trips</strong><span>Pick your mountains and dates, and see if a pass is worth it.</span></button>
@@ -76,6 +89,7 @@
     </section>
     <section id="plan-results"></section>
     </div>
+  </div>
   </div>
 </main>
 

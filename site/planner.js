@@ -4,13 +4,22 @@
   const $ = (id) => document.getElementById(id);
   let PF, D, trips = [], ticketOverride = {}, owned = "";
 
-  // Tabs work even before data loads.
-  for (const [tab, view] of [["tab-find", "view-find"], ["tab-plan", "view-plan"]]) {
+  // Tabs work even before data loads. Roving tabindex + arrow keys (WAI-ARIA tabs pattern).
+  const TABS = [["tab-find", "view-find"], ["tab-plan", "view-plan"]];
+  for (const [tab, view] of TABS) {
     $(tab).addEventListener("click", () => {
-      for (const [t, v] of [["tab-find", "view-find"], ["tab-plan", "view-plan"]]) {
-        $(t).setAttribute("aria-selected", t === tab); $(v).hidden = v !== view;
+      for (const [t, v] of TABS) {
+        $(t).setAttribute("aria-selected", t === tab); $(t).tabIndex = t === tab ? 0 : -1; $(v).hidden = v !== view;
       }
       document.body.dataset.view = view;
+    });
+    $(tab).addEventListener("keydown", (e) => {
+      const i = TABS.findIndex(([t]) => t === tab);
+      const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+      if (to == null) return;
+      e.preventDefault();
+      const [next] = TABS[(to + TABS.length) % TABS.length];
+      $(next).click(); $(next).focus();
     });
   }
 
