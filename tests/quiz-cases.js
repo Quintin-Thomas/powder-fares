@@ -185,6 +185,15 @@
       const r = run(D, { pass: "ikon_base" });
       a.equal(r.plans.length, 1); a.ok(/nearly the same/.test(r.limitations.fewerPlans));
     }],
+    ["Same mountains on different dates count as the same plan", (a) => {
+      // Cheapest plan and the 'explore' plan both want a (CO) + b (UT); only the dates could differ.
+      const D = mk([["a", "CO", IKON, "DEN"], ["b", "UT", IKON, "SLC"]],
+        { DEN: { "2027-01-04|2027-01-07": 100, "2027-02-01|2027-02-04": 101 }, SLC: { "2027-01-18|2027-01-21": 100, "2027-02-15|2027-02-18": 101 } });
+      D.day_snow = { a: { "02-02": 99, "02-03": 99 }, b: { "02-16": 99, "02-17": 99 } };
+      const r = run(D, { pass: "ikon_base", trips: 2 });
+      const sets = r.plans.map((p) => p.trips.map((t) => t.resort).sort().join("+"));
+      a.equal(new Set(sets).size, sets.length);
+    }],
     ["Big-name priority prefers marquee mountains, and falls back gracefully", (a) => {
       const D = mk([["vail", "CO", { epic: "unlimited" }, "EGE"], ["cheap", "CO", { epic: "unlimited" }, "DEN"]],
         { EGE: { "2027-01-04|2027-01-07": 250 }, DEN: { "2027-01-04|2027-01-07": 100 } });

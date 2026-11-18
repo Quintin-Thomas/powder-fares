@@ -147,10 +147,11 @@
     return best;
   }
 
-  // Share of trips (same mountain + same dates) two plans have in common.
+  // Share of mountains two plans have in common. Same mountains on other dates still reads as the
+  // same plan to a skier, so dates don't make a plan different.
   const overlap = (a, b) => {
-    const ids = new Set(a.season.map((c) => c.id));
-    return b.season.filter((c) => ids.has(c.id)).length / Math.max(a.season.length, b.season.length);
+    const ids = new Set(a.season.map((c) => c.resort));
+    return b.season.filter((c) => ids.has(c.resort)).length / Math.max(a.season.length, b.season.length);
   };
 
   function describeLift(D, prefs, ev) {
