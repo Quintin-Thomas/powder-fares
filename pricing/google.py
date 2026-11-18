@@ -26,6 +26,7 @@ class GoogleFlights:
         self.currency, self.pause, self.attempts, self.log = currency, pause, attempts, log
         self.proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
         self.errors: dict[str, int] = {}  # failed attempts by kind, for scan health
+        self.samples: list[dict] = []  # first few failures, kept small
 
     def _query(self, it: Itinerary):
         legs = [FlightQuery(date=it.depart.isoformat(), from_airport=it.origin, to_airport=it.dest)]
@@ -40,11 +41,9 @@ class GoogleFlights:
         for i in range(self.attempts):
             try:
                 html = fetch_flights_html(q, proxy=self.proxy)
-                node = LexborHTMLParser(html).css_first(r"script.ds\:1")
-                if node is None:
-                    raise ValueError("no results block (blocked, consent page, or layout change)")
-                payload = json.loads(node.text().split("data:", 1)[1].rsplit(",", 1)[0])
-                merged = [*((payload[2] or [[]])[0] or []), *((payload[3] or [[]])[0] or [])]
+                payload = _payload(html)
+                merged = [k for k in [*((payload[2] or [[]])[0] or []), *((payload[3] or [[]])[0] or [])]
+                          if _has_price(k)]  # one priceless listing would otherwise crash the whole page
                 payload[3] = [merged or None, *(payload[3] or [None])[1:]]
                 flights = parse_js("data:" + json.dumps(payload) + ",0")
                 quotes = [Quote(price=f.price, airlines=list(f.airlines), stops=len(f.flights) - 1,
@@ -55,11 +54,58 @@ class GoogleFlights:
                 return SearchResult(itinerary=it, quotes=quotes, url=q.url(), currency=self.currency, **_insights(payload))
             except Exception as e:  # network hiccups, throttling, page changes
                 self.log(f"  {it.key()} attempt {i + 1} failed: {type(e).__name__}: {e}")
-                kind = "blocked_or_no_results" if "no results block" in str(e) else \
+                kind = e.kind if isinstance(e, PageError) else \
                     "timeout" if "timeout" in type(e).__name__.lower() or "timed out" in str(e).lower() else type(e).__name__
                 self.errors[kind] = self.errors.get(kind, 0) + 1
+                if len(self.samples) < 5:  # a few small samples for the scan health file, to diagnose new failure kinds
+                    self.samples.append({"route": it.key(), "kind": kind, "detail": str(e)[:300]})
+                if kind == "bot_check":
+                    break  # Google wants us to slow down: don't retry this one, move on after the pause
                 time.sleep(5 * (i + 1))
+        time.sleep(self.pause * 4)
         return None
+
+
+class PageError(ValueError):
+    """Google answered, but not with flight results. kind: bot_check | google_error | no_results_block | unreadable."""
+
+    def __init__(self, kind: str, msg: str):
+        super().__init__(msg)
+        self.kind = kind
+
+
+def _has_price(k) -> bool:
+    """A results entry looks like [flight info, [[None, price], ...]]; "price unavailable" entries lack the price."""
+    try:
+        return isinstance(k[1][0][1], (int, float))
+    except (TypeError, IndexError):
+        return False
+
+
+def _payload(html: str):
+    """The flight-results JSON from Google's ds:1 script, or a PageError saying why there isn't one."""
+    tree = LexborHTMLParser(html)
+    node = tree.css_first(r"script.ds\:1")
+    if node is None:
+        title = (tree.css_first("title").text() if tree.css_first("title") else "").strip()
+        if title.lower().startswith("verifying"):
+            raise PageError("bot_check", "Google bot check page instead of results")
+        raise PageError("no_results_block", f"no results block (page title {title[:60]!r}, {len(html)} bytes)")
+    text = node.text()
+    if "errorHasStatus: true" in text:
+        # Google returns this instead of data when it has no answer for the search (no flights, or try later).
+        raise PageError("google_error", f"Google returned an error status: {text[:160]!r}")
+    start = text.find("data:")
+    if start < 0:
+        raise PageError("unreadable", f"results block without data: {text[:160]!r}")
+    try:
+        # Read exactly one JSON value; whatever follows it (sideChannel, etc.) is ignored.
+        payload, _ = json.JSONDecoder().raw_decode(text[start + 5:].lstrip())
+    except json.JSONDecodeError as e:
+        raise PageError("unreadable", f"results JSON unreadable ({e.msg} at {e.pos}): {text[:160]!r}") from None
+    if not isinstance(payload, list):
+        raise PageError("unreadable", f"unexpected results shape: {type(payload).__name__}")
+    return payload
 
 
 def _hhmm(t) -> str | None:

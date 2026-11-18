@@ -10,6 +10,46 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import build  # noqa: E402
 import scan  # noqa: E402
 import snow  # noqa: E402
+from pricing import google  # noqa: E402
+
+
+def _page(script: str | None, title: str = "Google Flights") -> str:
+    body = f"<script class=\"ds:1\" nonce=\"x\">{script}</script>" if script is not None else ""
+    return f"<html><head><title>{title}</title></head><body>{body}</body></html>"
+
+
+class GooglePageTests(unittest.TestCase):
+    """Each kind of page Google can send back is recognized (minimal hand-made pages, not saved Google HTML)."""
+
+    def test_reads_results_even_with_commas_after_the_data(self):
+        p = google._payload(_page("AF_initDataCallback({key: 'ds:1', hash: '2', data:[[1,2],null,[3]], sideChannel: {a: 1, b: 2}});"))
+        self.assertEqual(p, [[1, 2], None, [3]])
+
+    def test_error_status_is_google_error_not_a_parse_crash(self):
+        with self.assertRaises(google.PageError) as cm:
+            google._payload(_page("AF_initDataCallback({key: 'ds:1', hash: '2', data:null, errorHasStatus: true, sideChannel: {}});"))
+        self.assertEqual(cm.exception.kind, "google_error")
+
+    def test_bot_check_page_is_recognized(self):
+        with self.assertRaises(google.PageError) as cm:
+            google._payload(_page(None, title="Verifying..."))
+        self.assertEqual(cm.exception.kind, "bot_check")
+
+    def test_other_page_without_results(self):
+        with self.assertRaises(google.PageError) as cm:
+            google._payload(_page(None, title="Before you continue"))
+        self.assertEqual(cm.exception.kind, "no_results_block")
+
+    def test_price_unavailable_listing_is_skipped(self):
+        self.assertTrue(google._has_price([["UA"], [[None, 467], "token"]]))
+        self.assertFalse(google._has_price([["UA"], [[None]]]))  # Google's "price unavailable"
+        self.assertFalse(google._has_price([["UA"], []]))
+        self.assertFalse(google._has_price([["UA"]]))
+
+    def test_garbled_results_are_unreadable(self):
+        with self.assertRaises(google.PageError) as cm:
+            google._payload(_page("AF_initDataCallback({key: 'ds:1', data:[[1,2, sideChannel: {}});"))
+        self.assertEqual(cm.exception.kind, "unreadable")
 
 
 class ScanTests(unittest.TestCase):

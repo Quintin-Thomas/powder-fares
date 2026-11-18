@@ -157,6 +157,8 @@ def main() -> int:
     secs: list[float] = []
     started = time.monotonic()
     done: list[tuple] = []
+    streak = 0  # consecutive failed searches
+    stopped_early = None
 
     def flush() -> None:
         for pair, (quotes, history) in files.items():
@@ -180,7 +182,13 @@ def main() -> int:
         state[unit_key(u)] = datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z")
         if res is None:
             fail += 1
+            streak += 1
+            if streak >= 15:  # Google is refusing us right now: stop instead of hammering it; next run resumes
+                stopped_early = f"{streak} searches in a row failed"
+                log(f"stopping early: {stopped_early}")
+                break
             continue
+        streak = 0
         ok += 1
         secs.append(time.monotonic() - t0)
         by_airline: dict[str, list] = {}
@@ -218,6 +226,7 @@ def main() -> int:
             "searched": len(done), "planned": len(todo), "ok": ok, "failed": fail,
             "minutes": round((time.monotonic() - started) / 60, 1),
             "multi_searched": len(set(done) & set(extra)), "attempt_errors": src.errors,
+            "failure_samples": src.samples, "stopped_early": stopped_early,
             "avg_seconds": round(sum(secs) / len(secs), 1) if secs else None,
             "windows_total": len(units), "windows_checked_7d": sum(map(recent, units)),
             "multi_total": len(extra), "multi_checked_7d": sum(map(recent, extra))})
