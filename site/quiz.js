@@ -44,7 +44,9 @@
     { title: "What matters most?", valid: (a) => !!a.priority,
       body: (a) => radios("priority", [["cost", "Lowest total cost", "flights + lift access"], ["snow", "Best snow", "historical conditions on your ski days"],
         ["explore", "Explore different regions", "spread trips across states and provinces"], ["marquee", "Big-name mountains", "well-known destination resorts"]], a.priority)
-        + `<label class="sub">Max you'd spend on flights for the whole season (optional): $ <input type="number" min="0" step="50" data-q="budget" value="${esc(a.budget)}" placeholder="no limit"></label>` },
+        + `<label class="sub budget">Max you'd spend on flights for the whole season (optional)
+            <span class="money-input"><span aria-hidden="true">$</span><input type="number" min="0" step="50" inputmode="numeric" data-q="budget" value="${esc(a.budget)}" placeholder="No limit" aria-describedby="budget-help"></span></label>
+          <p class="hint" id="budget-help">Flights + board bags across all trips. Lift tickets and lodging aren't part of this limit.</p>` },
     { title: "Do you already have a pass?", valid: (a) => !!a.pass,
       body: (a) => radios("pass", [...window.PF.D.passes.map((p) => [p.id, `I have the ${p.name}`]), ["decide", "Not yet. Help me decide", "we'll compare passes and day tickets"]], a.pass)
         + (a.pass && a.pass !== "decide" ? `<label class="opt"><input type="checkbox" data-q="allowOffPass" ${a.allowOffPass ? "checked" : ""}> Also suggest mountains not on my pass (I'd buy day tickets)</label>` : "") },
@@ -64,7 +66,7 @@
       <div class="progress" aria-live="polite">Question ${state.step + 1} of ${Q.length}</div>
       <div class="bar" aria-hidden="true"><span style="width:${((state.step + 1) / Q.length) * 100}%"></span></div>
       <h2 id="q-title" tabindex="-1">${q.title}</h2>
-      <div aria-labelledby="q-title">${q.body(a)}</div>
+      <div class="q-body" role="group" aria-labelledby="q-title">${q.body(a)}</div>
       <div class="nav"><button class="btn ghost" id="q-back" ${state.step === 0 ? "disabled" : ""}>Back</button>
         <button class="btn" id="q-next" ${q.valid(a) ? "" : "disabled"}>${state.step === Q.length - 1 ? "Show my plans" : "Next"}</button></div></div>`;
     $("quiz").querySelectorAll("[data-q]").forEach((el) => el.addEventListener("change", () => {
@@ -107,13 +109,16 @@
       L.stale && `${L.stale} fare${L.stale > 1 ? "s" : ""} older than 4 days left out.`,
       L.candidates < 20 && "Fares are still being collected for many routes, so options are limited. More fill in every day.",
     ].filter(Boolean);
-    $("quiz").innerHTML = `<div class="quiz" style="max-width:none">
-      <h2 id="r-title" tabindex="-1">${r.plans.length ? `Your season plan${r.plans.length > 1 ? "s" : ""}` : "No plans found yet"}</h2>
-      <p class="meta">${inherited} · <a href="#" id="r-filters">change</a>. Ski days are the full days between your flights.${owned ? ` Assumes you haven't used any ${esc(owned.name)} days yet.` : ""}</p>
-      ${notes.map((n) => `<p class="note">${esc(n)}</p>`).join("")}
+    $("quiz").innerHTML = `<div class="quiz-results">
+      <div class="results-head">
+        <h2 id="r-title" tabindex="-1">${r.plans.length ? `Your season plan${r.plans.length > 1 ? "s" : ""}` : "No plans found yet"}</h2>
+        <div class="nav"><button class="btn ghost" id="r-edit">Change answers</button><button class="btn ghost" id="r-restart">Start over</button></div>
+      </div>
+      <p class="assumptions">${inherited} · <a href="#" id="r-filters">change</a>. Ski days are the full days between your flights.${owned ? ` Assumes you haven't used any ${esc(owned.name)} days yet.` : ""}</p>
+      ${notes.length ? `<ul class="result-notes">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
       ${r.plans.length ? `<div class="plans">${r.plans.map((p, i) => planCard(p, i, owned)).join("")}</div>`
-        : `<p>Nothing fits those answers with the fares we have right now. Try more months, more regions, or fewer trips.</p>`}
-      <div class="nav"><button class="btn ghost" id="r-edit">Change answers</button><button class="btn ghost" id="r-restart">Start over</button></div></div>`;
+        : `<div class="empty"><strong>Nothing fits those answers with the fares we have right now.</strong><p class="hint">Try more months, more regions, or fewer trips.</p></div>`}
+    </div>`;
     $("r-edit").addEventListener("click", () => { state.done = false; state.step = 0; save(); draw(); focusTitle(); });
     $("r-restart").addEventListener("click", () => { state = { step: 0, answers: { ...DEFAULTS }, done: false }; save(); draw(); focusTitle(); });
     $("r-filters").addEventListener("click", (e) => { e.preventDefault(); $("origin").focus(); });
@@ -126,7 +131,7 @@
   function planCard(p, i, owned) {
     const trips = p.trips.map((t) => `<li><div class="row"><strong>${esc(t.name)}</strong><span>${t.snow != null ? gradeBadge({ score: t.snow }, true) : ""}</span></div>
       <div>Ski ${t.skiDates.map(short).join(" & ")} <span class="meta">(${esc(t.region)})</span></div>
-      <div class="meta">Fly ${window.PF.fmtDate(t.depart)} → ${window.PF.fmtDate(t.ret)} · ${t.origin}→${t.airport} · ${money(t.fare.total)} <a href="${esc(t.url)}" target="_blank" rel="noopener">check fares</a></div></li>`).join("");
+      <div class="meta">Fly ${window.PF.fmtDate(t.depart)} → ${window.PF.fmtDate(t.ret)} · ${t.origin} → ${t.airport} · ${money(t.fare.total)} <a href="${esc(t.url)}" target="_blank" rel="noopener" aria-label="Check fares, ${t.origin} to ${t.airport}, ${esc(t.name)} trip (opens in a new tab)">Check fares</a></div></li>`).join("");
     const l = p.lift;
     let pass;
     if (owned) {
@@ -142,14 +147,14 @@
     const why = [flagged.length && `${flagged.join(" and ")}'s day limit on the ${owned ? owned.name : "pass"} isn't verified yet`,
       /Session/.test(l.label) && "the Ikon Session Pass resort list isn't published"].filter(Boolean).join("; ");
     const prov = p.provisional ? `<p class="caution">${owned ? "Check before relying on it" : "Provisional"}: ${esc(why || "some pass coverage isn't verified")}. Confirm on the official pass site${owned ? "" : " before buying"}.</p>` : "";
-    return `<article class="plan-card${p.bestMatch ? " match" : ""}">
-      <div class="row"><h3>${esc(p.label)}</h3>${p.bestMatch ? `<span class="chip low">Best match</span>` : ""}</div>
-      <div class="meta">${esc(p.reason)}${p.snow != null ? ` · snow on your ski days: ${gradeBadge({ score: p.snow }, true)}` : ""}</div>
+    return `<article class="plan-card${p.bestMatch ? " match" : ""}" aria-labelledby="plan-${i}-h">
+      <div class="plan-head"><h3 id="plan-${i}-h">${esc(p.label)}</h3>${p.bestMatch ? `<span class="tag">Best match</span>` : ""}</div>
+      <p class="meta">${esc(p.reason)}${p.snow != null ? ` · snow on your ski days: ${gradeBadge({ score: p.snow }, true)}` : ""}</p>
       <ul class="plan-trips">${trips}</ul>
-      <div class="totals"><span>Flights${window.PF.opts().bag ? " + board bags" : ""}</span><span>${money(p.flights)}</span>
-        <span>Lift access${owned ? " (beyond your pass)" : ""}</span><span>${money(l.cost)}</span>
-        <span class="grand">Estimated total</span><span class="grand">${money(p.total)}</span></div>
-      <p class="meta">${pass}</p>${prov}
+      <dl class="totals"><dt>Flights${window.PF.opts().bag ? " + board bags" : ""}</dt><dd>${money(p.flights)}</dd>
+        <dt>Lift access${owned ? " (beyond your pass)" : ""}</dt><dd>${money(l.cost)}</dd>
+        <dt class="grand">Estimated flights + lifts</dt><dd class="grand">${money(p.total)}</dd></dl>
+      <p class="plan-pass">${pass}</p>${prov}
       <p class="note">Not included: lodging, ground transport, food. Snow grades are historical, not a forecast.</p>
       <button class="btn" data-load="${i}">Open this plan in the planner</button>
     </article>`;

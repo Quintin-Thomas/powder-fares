@@ -77,20 +77,21 @@
       const r = t.resort && resortById(t.resort);
       const fl = r ? flightOptions(r) : [];
       const chosen = fl.find((x) => x.wk === t.win);
-      const winSel = r ? `<select data-i="${i}" data-f="win"><option value="">No flight (drive / not sure)</option>${fl.map((x) => {
+      const n = i + 1, rn = r ? PF.esc(r.name) : `trip ${n}`;
+      const winSel = r ? `<select data-i="${i}" data-f="win" aria-label="Flight dates for ${rn}"><option value="">No flight (drive / not sure)</option>${fl.map((x) => {
         const [d, rt] = x.wk.split("|");
         return `<option value="${x.wk}" ${x.wk === t.win ? "selected" : ""}>${PF.fmtDate(d)} → ${PF.fmtDate(rt)} · $${x.q.total}</option>`;
       }).join("")}</select>` : `<span class="note">pick a mountain</span>`;
       return `<tr>
-        <td><select data-i="${i}" data-f="resort">${resortSelect(t.resort)}</select></td>
+        <td><select data-i="${i}" data-f="resort" aria-label="Mountain for trip ${n}">${resortSelect(t.resort)}</select></td>
         <td>${winSel}</td>
-        <td class="num"><input type="number" min="1" max="60" value="${t.days}" data-i="${i}" data-f="days">
-          ${t.win ? `<select data-i="${i}" data-f="first" title="Skiing the day you land depends on your flight time"><option value="1" ${t.first !== "0" ? "selected" : ""}>from day after arrival</option><option value="0" ${t.first === "0" ? "selected" : ""}>from arrival day (early flight)</option></select>
-            <select data-i="${i}" data-f="last" title="Skiing the day you fly home depends on your flight time"><option value="0" ${t.last !== "1" ? "selected" : ""}>until day before flight home</option><option value="1" ${t.last === "1" ? "selected" : ""}>incl. flight-home day (late flight)</option></select>` : ""}
+        <td class="num"><input type="number" min="1" max="60" inputmode="numeric" value="${t.days}" data-i="${i}" data-f="days" aria-label="Ski days at ${rn}">
+          ${t.win ? `<select data-i="${i}" data-f="first" aria-label="First ski day at ${rn}" title="Skiing the day you land depends on your flight time"><option value="1" ${t.first !== "0" ? "selected" : ""}>from day after arrival</option><option value="0" ${t.first === "0" ? "selected" : ""}>from arrival day (early flight)</option></select>
+            <select data-i="${i}" data-f="last" aria-label="Last ski day at ${rn}" title="Skiing the day you fly home depends on your flight time"><option value="0" ${t.last !== "1" ? "selected" : ""}>until day before flight home</option><option value="1" ${t.last === "1" ? "selected" : ""}>incl. flight-home day (late flight)</option></select>` : ""}
           ${t.win ? `<div class="note">${skiDates(t).join(", ") || "no full ski days"}${skiDates(t).length < t.days ? ` <span class="stale">(only ${skiDates(t).length} ski day${skiDates(t).length === 1 ? "" : "s"} fit between your flights)</span>` : ""}</div>` : ""}</td>
-        <td class="num">${r ? `<input type="number" min="0" value="${ticket(r.id)}" data-tk="${r.id}" title="${D.tickets[r.id]?.basis === "cited" ? "From published 2026-27 prices" : "Estimate"}; edit to use your own price">` : ""}</td>
-        <td class="num">${chosen ? `<a href="${PF.esc(chosen.url)}" target="_blank" rel="noopener">$${chosen.q.total}</a>` : "–"}</td>
-        <td><button class="icon-btn" data-del="${i}" aria-label="Remove trip">×</button></td></tr>`;
+        <td class="num">${r ? `<input type="number" min="0" inputmode="numeric" value="${ticket(r.id)}" data-tk="${r.id}" aria-label="Day ticket price at ${rn}, ${D.tickets[r.id]?.basis === "cited" ? "published price" : "estimate"}; edit to use your own" title="${D.tickets[r.id]?.basis === "cited" ? "From published 2026-27 prices" : "Estimate"}; edit to use your own price">` : ""}</td>
+        <td class="num">${chosen ? `<a href="${PF.esc(chosen.url)}" target="_blank" rel="noopener" aria-label="Flight for ${rn}, check fares (opens in a new tab)">$${chosen.q.total}</a>` : "–"}</td>
+        <td><button class="icon-btn" data-del="${i}" aria-label="Remove ${rn}">×</button></td></tr>`;
     }).join("");
 
     const tb = $("trips");
@@ -205,7 +206,8 @@
       <td class="num">$${(s.cost + flights).toLocaleString()}</td></tr>`).join("");
     $("plan-results").innerHTML = `<div class="result">
       ${advice(best, base, scored, totalDays, flights, name)}
-      <table><thead><tr><th>Option · what covers which days</th><th class="num">Lift cost</th><th class="num">vs tickets</th><th class="num">+ flights</th></tr></thead><tbody>${rows}</tbody></table>
+      <h3 class="section-h">Every way to pay, cheapest first</h3>
+      <div class="table-scroll" role="region" aria-label="Pass options compared" tabindex="0"><table class="options"><caption class="sr-only">Lift cost of each pass option for your ski days, compared with day tickets</caption><thead><tr><th scope="col">Option · what covers which days</th><th scope="col" class="num">Lift cost</th><th scope="col" class="num">vs tickets</th><th scope="col" class="num">+ flights</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="note">Lift cost = pass price + any day tickets the pass doesn't cover (day limits, blackouts, or mountains not on that pass). Day-ticket prices are typical advance online prices (estimates unless marked as published), and you can edit them. Ikon Session 3/4-day and most Epic Day prices are estimates. <strong>Limits:</strong> adult prices; Ikon Session and Epic Day passes are treated as valid at every Ikon or Epic resort in our list (some products exclude certain resorts or dates, so confirm before buying); lodging, ground transport and meals aren't included. Blackouts are checked against the ski dates shown for each trip.</p>
     </div>`;
   }

@@ -83,8 +83,10 @@
     <div id="manual" hidden>
     <p class="summary">Add the trips you're thinking about. The planner prices your ski days every possible way (day tickets, each season pass, Ikon Session and Epic Day passes, or an Ikon and an Epic product together) and adds flights and board bags from the latest scan.</p>
     <label class="owned">Pass you already own <select id="owned"><option value="">None yet</option></select></label>
-    <section class="panel">
-      <table class="plan" id="trips"><thead><tr><th>Mountain</th><th>Trip dates (flight)</th><th class="num">Ski days (dates used)</th><th class="num">Day ticket</th><th class="num">Flight</th><th></th></tr></thead><tbody></tbody></table>
+    <h2 class="section-h" id="trips-h">Your trips</h2>
+    <p class="scroll-cue" aria-hidden="true">Scroll sideways to see all trip columns →</p>
+    <section class="panel" role="region" aria-labelledby="trips-h" tabindex="0">
+      <table class="plan" id="trips"><caption class="sr-only">Your trips: mountain, flight dates, ski days, day-ticket price and flight cost</caption><thead><tr><th scope="col">Mountain</th><th scope="col">Trip dates (flight)</th><th scope="col" class="num">Ski days (dates used)</th><th scope="col" class="num">Day ticket</th><th scope="col" class="num">Flight</th><th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody></tbody></table>
       <button id="add-trip" class="btn">+ Add trip</button>
     </section>
     <section id="plan-results"></section>
