@@ -105,6 +105,8 @@ def main() -> int:
     ap.add_argument("--airports", default="", help="comma list to restrict (testing)")
     ap.add_argument("--dry-run", action="store_true", help="only report what is due")
     ap.add_argument("--multi-only", action="store_true", help="only multi-mountain units (testing)")
+    ap.add_argument("--max-minutes", type=float, default=35,
+                    help="stop searching after this long, so the run saves its results before the job time limit")
     args = ap.parse_args()
 
     resorts = json.loads((DATA / "resorts.json").read_text())["resorts"]
@@ -153,7 +155,20 @@ def main() -> int:
     files: dict[str, tuple[dict, dict]] = {}
     ok = fail = 0
     secs: list[float] = []
+    started = time.monotonic()
+    done: list[tuple] = []
+
+    def flush() -> None:
+        for pair, (quotes, history) in files.items():
+            save(STORE / "quotes" / f"{pair}.json", quotes)
+            save(STORE / "history" / f"{pair}.json", history)
+        save(STORE / "scan_state.json", state)
+
     for u in todo:
+        if (time.monotonic() - started) / 60 > args.max_minutes:
+            log(f"time limit ({args.max_minutes} min) reached after {len(done)} searches; the rest wait for the next run")
+            break
+        done.append(u)
         kind, a, b, d, r = u
         pair = f"{a}-{b}" if kind == "rt" else f"ow/{a}-{b}"
         if pair not in files:
@@ -185,11 +200,9 @@ def main() -> int:
         h["google"].update(res.history)
         if ok % 25 == 0:
             log(f"progress: {ok} ok, {fail} failed")
+            flush()  # if the job is killed anyway, earlier results are already on disk
 
-    for pair, (quotes, history) in files.items():
-        save(STORE / "quotes" / f"{pair}.json", quotes)
-        save(STORE / "history" / f"{pair}.json", history)
-    save(STORE / "scan_state.json", state)
+    flush()
     if todo:  # health record for the site footer (skipped on publish-only runs)
         week_ago = datetime.now(timezone.utc) - timedelta(days=7)
 
@@ -202,8 +215,9 @@ def main() -> int:
 
         save(STORE / "last_scan.json", {
             "finished": datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z"),
-            "searched": len(todo), "ok": ok, "failed": fail,
-            "multi_searched": len(set(todo) & set(extra)), "attempt_errors": src.errors,
+            "searched": len(done), "planned": len(todo), "ok": ok, "failed": fail,
+            "minutes": round((time.monotonic() - started) / 60, 1),
+            "multi_searched": len(set(done) & set(extra)), "attempt_errors": src.errors,
             "avg_seconds": round(sum(secs) / len(secs), 1) if secs else None,
             "windows_total": len(units), "windows_checked_7d": sum(map(recent, units)),
             "multi_total": len(extra), "multi_checked_7d": sum(map(recent, extra))})

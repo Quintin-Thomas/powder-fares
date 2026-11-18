@@ -37,6 +37,9 @@ jobs:
         continue-on-error: true
         timeout-minutes: 15
       - name: Flight scan
+        # scan.py stops itself at 35 min; the step limit is a backstop, and progress is saved every 25 searches
+        timeout-minutes: 40
+        continue-on-error: true
         run: python scan.py --budget "${{ github.event_name == 'push' && '0' || github.event.inputs.budget || '350' }}"
       - name: Build page data
         run: python build.py

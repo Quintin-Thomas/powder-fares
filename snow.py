@@ -152,8 +152,12 @@ def main() -> None:
     ap.add_argument("--out", default=str(OUT), help="output folder (testing)")
     ap.add_argument("--winters-per-run", type=int, default=12, help="resorts to backfill 45-winter history for")
     ap.add_argument("--climate-per-run", type=int, default=15, help="resorts to backfill 10-season climatology for")
+    ap.add_argument("--max-minutes", type=float, default=12,
+                    help="stop backfilling after this long (the workflow kills the step at 15 min, losing unsaved work)")
     args = ap.parse_args()
     out = Path(args.out)
+    t0 = time.monotonic()
+    elapsed = lambda: (time.monotonic() - t0) / 60  # noqa: E731
 
     resorts = json.loads((ROOT / "data" / "resorts.json").read_text())["resorts"]
     if args.only:
@@ -168,8 +172,14 @@ def main() -> None:
 
     # Then backfill the 10-season climatology for resorts that don't have it yet, a batch per run,
     # stopping early if Open-Meteo rate-limits us (the rest continues next run).
+    # Climate and winter history share the time budget, so neither starves the other:
+    # climate may use up to the halfway mark, winter history the rest.
+    half = args.max_minutes / 2
     todo = [r for r in resorts if args.refresh_climate or r["id"] not in clim][: args.climate_per_run]
     for r in todo:
+        if elapsed() > half:
+            print(f"  climate: time budget used ({elapsed():.1f} min); will continue next run")
+            break
         print(f"climate {r['id']}")
         try:
             clim[r["id"]] = climate(r)
@@ -187,12 +197,16 @@ def main() -> None:
     cur = current_enso(enso)
     analogs = analog_seasons(enso, cur)
     print(f"ENSO: {cur['label']} (auto={cur['auto']}), analog winters {analogs}")
+    (out / "enso_meta.json").write_text(json.dumps({**cur, "analogs": analogs}, indent=1))  # before the slow part
     w_path = out / "winters.json"
     winters = json.loads(w_path.read_text()) if w_path.exists() else {}
     first = enso["since"]
     last = date.today().year - 2  # last completed winter's start year
     todo = [r for r in resorts if len(winters.get(r["id"], {})) < last - first + 1][: args.winters_per_run]
     for r in todo:
+        if elapsed() > args.max_minutes:
+            print(f"  winters: time budget used ({elapsed():.1f} min); will continue next run")
+            break
         print(f"winters {r['id']} {first}-{last + 1}")
         got = winters.setdefault(r["id"], {})
         try:
@@ -206,9 +220,11 @@ def main() -> None:
                 time.sleep(1)
         except RuntimeError as e:
             print(f"  stopped ({e}); will continue next run")
+            winters.pop(r["id"], None)  # never keep a half-filled history: it would skew the El Niño comparison
             break
+        finally:
+            w_path.write_text(json.dumps(winters, separators=(",", ":")))  # save progress as we go
     w_path.write_text(json.dumps(winters, separators=(",", ":")))
-    (out / "enso_meta.json").write_text(json.dumps({**cur, "analogs": analogs}, indent=1))
     print(f"snow done: {len(clim)}/{len(resorts)} climate, {len(winters)}/{len(resorts)} winter histories")
 
 
