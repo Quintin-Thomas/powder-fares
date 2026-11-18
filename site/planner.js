@@ -2,9 +2,7 @@
 // Season planner: is a pass worth it? Prices every combination of an Ikon product and an Epic product.
 (() => {
   const $ = (id) => document.getElementById(id);
-  const DAY = 864e5;
-  const addDays = (iso, n) => new Date(Date.parse(iso + "T12:00:00Z") + n * DAY).toISOString().slice(0, 10);
-  let PF, D, trips = [], ticketOverride = {};
+  let PF, D, trips = [], ticketOverride = {}, owned = "";
 
   // Tabs work even before data loads.
   for (const [tab, view] of [["tab-find", "view-find"], ["tab-plan", "view-plan"]]) {
@@ -25,32 +23,30 @@
     try {
       trips = JSON.parse(localStorage.getItem("pf-trips") || "[]");
       ticketOverride = JSON.parse(localStorage.getItem("pf-tickets") || "{}");
+      owned = localStorage.getItem("pf-owned") || "";
     } catch (e) {}
-    if (!trips.length) trips = [{ resort: "", win: "", days: 3 }];
-    $("add-trip").addEventListener("click", () => { trips.push({ resort: "", win: "", days: 3 }); draw(); });
+    $("owned").innerHTML += D.passes.map((p) => `<option value="${p.id}">${PF.esc(p.name)}</option>`).join("");
+    if (!D.passes.some((p) => p.id === owned)) owned = "";
+    $("owned").value = owned;
+    $("owned").addEventListener("change", () => { owned = $("owned").value; save(); draw(); });
+    if (!trips.length) trips = [{ resort: "", win: "", days: 2 }];
+    $("add-trip").addEventListener("click", () => { trips.push({ resort: "", win: "", days: 2 }); draw(); });
     $("bag").addEventListener("change", draw);
+    $("origin").addEventListener("change", draw);
     document.addEventListener("pf-filters", draw);
     draw();
   }
 
   const resortById = (id) => D.resorts.find((r) => r.id === id);
-  // Ski dates for a trip: start on arrival day or the day after (default), never past the return flight day.
-  function skiDatesISO(t) {
-    const [dep, ret] = t.win.split("|");
-    const out = [];
-    for (let k = 0; k < t.days; k++) {
-      const d = addDays(dep, k + (t.first === "0" ? 0 : 1));
-      if (d > ret) break;
-      out.push(d);
-    }
-    return out;
-  }
+  // Ski dates for a trip (shared rule in planner-core.js): the full days between the flights by default.
+  const skiDatesISO = (t) => window.PFCore.skiDates(t.win, t);
   const skiDates = (t) => skiDatesISO(t).map((d) => PF.fmtDate(d).replace(/^\w+, /, ""));
   const ticket = (id) => ticketOverride[id] ?? D.tickets[id]?.typical ?? 150;
 
   function flightOptions(r) {
     const out = [];
-    for (const o of D.origins) for (const ap of r.airports) {
+    const want = PF.opts().origin;
+    for (const o of D.origins.filter((x) => !want || want === "any" || x === want)) for (const ap of r.airports) {
       for (const [wk, win] of Object.entries(D.routes[`${o}-${ap.code}`] || {})) {
         const q = PF.bestQuote(win, PF.opts());
         if (q) out.push({ key: `${o}-${ap.code}|${wk}`, wk, o, ap: ap.code, q, url: win.url });
@@ -80,8 +76,9 @@
         <td><select data-i="${i}" data-f="resort">${resortSelect(t.resort)}</select></td>
         <td>${winSel}</td>
         <td class="num"><input type="number" min="1" max="60" value="${t.days}" data-i="${i}" data-f="days">
-          ${t.win ? `<select data-i="${i}" data-f="first" title="Blackout checks use these exact ski dates"><option value="1" ${t.first !== "0" ? "selected" : ""}>from day after arrival</option><option value="0" ${t.first === "0" ? "selected" : ""}>from arrival day</option></select>` : ""}
-          ${t.win ? `<div class="note">${skiDates(t).join(", ")}${skiDates(t).length < t.days ? ` <span class="stale">(only ${skiDates(t).length} ski day${skiDates(t).length === 1 ? "" : "s"} fit before your return flight)</span>` : ""}</div>` : ""}</td>
+          ${t.win ? `<select data-i="${i}" data-f="first" title="Skiing the day you land depends on your flight time"><option value="1" ${t.first !== "0" ? "selected" : ""}>from day after arrival</option><option value="0" ${t.first === "0" ? "selected" : ""}>from arrival day (early flight)</option></select>
+            <select data-i="${i}" data-f="last" title="Skiing the day you fly home depends on your flight time"><option value="0" ${t.last !== "1" ? "selected" : ""}>until day before flight home</option><option value="1" ${t.last === "1" ? "selected" : ""}>incl. flight-home day (late flight)</option></select>` : ""}
+          ${t.win ? `<div class="note">${skiDates(t).join(", ") || "no full ski days"}${skiDates(t).length < t.days ? ` <span class="stale">(only ${skiDates(t).length} ski day${skiDates(t).length === 1 ? "" : "s"} fit between your flights)</span>` : ""}</div>` : ""}</td>
         <td class="num">${r ? `<input type="number" min="0" value="${ticket(r.id)}" data-tk="${r.id}" title="${D.tickets[r.id]?.basis === "cited" ? "From published 2026-27 prices" : "Estimate"}; edit to use your own price">` : ""}</td>
         <td class="num">${chosen ? `<a href="${PF.esc(chosen.url)}" target="_blank" rel="noopener">$${chosen.q.total}</a>` : "–"}</td>
         <td><button class="icon-btn" data-del="${i}" aria-label="Remove trip">×</button></td></tr>`;
@@ -104,8 +101,27 @@
   }
 
   function save() {
-    try { localStorage.setItem("pf-trips", JSON.stringify(trips)); localStorage.setItem("pf-tickets", JSON.stringify(ticketOverride)); } catch (e) {}
+    try {
+      localStorage.setItem("pf-trips", JSON.stringify(trips)); localStorage.setItem("pf-tickets", JSON.stringify(ticketOverride));
+      localStorage.setItem("pf-owned", owned);
+    } catch (e) {}
   }
+
+  // Hand-off from the quiz. Replaces the trip list in one step (the caller confirms first), skipping
+  // any trip whose flight window is no longer in the data. Returns how many trips were loaded.
+  window.PFPlanner = {
+    hasTrips: () => trips.some((t) => t.resort),
+    tickets: () => ({ ...ticketOverride }),
+    load(newTrips, ownedPass) {
+      if (!D) return 0;
+      const ok = newTrips.filter((t) => { const r = resortById(t.resort); return r && flightOptions(r).some((x) => x.wk === t.win); });
+      trips = ok.map((t) => ({ resort: t.resort, win: t.win, days: t.days || 2 }));
+      if (!trips.length) trips = [{ resort: "", win: "", days: 2 }];
+      owned = ownedPass || ""; $("owned").value = owned;
+      save(); draw();
+      return ok.length;
+    },
+  };
 
   // Pass math lives in planner-core.js (window.PFCore) so it can be unit-tested.
 
@@ -116,8 +132,10 @@
       const list = Object.entries(days).map(([n, k]) => `${PF.esc(n)} (${k} day${k > 1 ? "s" : ""})`);
       return list.length > 1 ? list.slice(0, -1).join(", ") + " and " + list.at(-1) : list[0] || "";
     };
+    const ownedName = owned && (D.passes.find((p) => p.id === owned) || {}).name;
     const steps = best.parts.filter((p) => Object.keys(p.days).length).map((p) => {
       if (p.label === "Day tickets") return `Buy day tickets at ${where(p.days)}, about ${$$(p.cost)}.`;
+      if (p.label === ownedName) return `Use your ${PF.esc(ownedName)} at ${where(p.days)} (already paid for).`;
       const pool = p.label.match(/^(.*) (\d)-day$/);
       const what = pool ? `a ${pool[2]}-day ${pool[1]}` : `the ${p.label}`;
       return `Buy ${PF.esc(what)} (${$$(p.cost)}) and use it at ${where(p.days)}.`;
@@ -125,7 +143,8 @@
     const seasonBest = scored.find((s) => s.ikon.kind === "season" || s.epic.kind === "season");
     const days = `${totalDays} day${totalDays > 1 ? "s" : ""}`;
     let save;
-    if (best === base) save = `No pass saves money for this plan. Day tickets are the cheapest way to go.`;
+    if (ownedName) save = best.cost ? `Beyond the ${PF.esc(ownedName)} you already have, this costs about <strong>${$$(best.cost)}</strong> for the days it doesn't cover.` : `Your ${PF.esc(ownedName)} covers every ski day, so there are no extra lift costs.`;
+    else if (best === base) save = `No pass saves money for this plan. Day tickets are the cheapest way to go.`;
     else {
       save = `You'll save <strong>${$$(base.cost - best.cost)}</strong> compared with buying a day ticket for every day (${$$(base.cost)})`;
       if (seasonBest && seasonBest !== best) save += `, and <strong>${$$(seasonBest.cost - best.cost)}</strong> compared with the best season-pass option (${PF.esc(name(seasonBest))}, ${$$(seasonBest.cost)})`;
@@ -134,10 +153,12 @@
     const trip = flights ? `Estimated lift access + flights${PF.opts().bag ? " (with board bags)" : ""}: about <strong>${$$(best.cost + flights)}</strong>. Lodging, ground transport and meals aren't included.` : "";
     const verifiedBest = scored.find((s) => !s.unverified);
     const caution = best.unverified
-      ? `<p class="caution">⚠ This depends on pass coverage we haven't verified (the Ikon Session Pass resort list, or a resort's day limit). Check ikonpass.com or epicpass.com before buying.${verifiedBest ? ` The cheapest option using only verified rules is <strong>${PF.esc(name(verifiedBest))}</strong> at ${$$(verifiedBest.cost)}.` : ""}</p>` : "";
+      ? (ownedName
+        ? `<p class="caution">⚠ A resort's day limit on your ${PF.esc(ownedName)} isn't verified yet. Check ikonpass.com or epicpass.com before relying on it.</p>`
+        : `<p class="caution">⚠ This depends on pass coverage we haven't verified (the Ikon Session Pass resort list, or a resort's day limit). Check ikonpass.com or epicpass.com before buying.${verifiedBest ? ` The cheapest option using only verified rules is <strong>${PF.esc(name(verifiedBest))}</strong> at ${$$(verifiedBest.cost)}.` : ""}</p>`) : "";
     return `<div class="best">
-      <div class="meta">The cheapest way to ski your ${days}</div>
-      <div class="row"><span class="price">${$$(best.cost)}</span><span class="break">in lift costs</span></div>
+      <div class="meta">The cheapest way to ski your ${days}${ownedName ? ` with your ${PF.esc(ownedName)}` : ""}</div>
+      <div class="row"><span class="price">${$$(best.cost)}</span><span class="break">${ownedName ? "in extra lift costs" : "in lift costs"}</span></div>
       <ol class="steps">${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
       <p class="meta">${save} ${trip}</p>${caution}</div>`;
   }
@@ -161,8 +182,10 @@
       const dates = t.win ? skiDatesISO(t) : Array(t.days).fill("");
       for (const date of dates) skiDays.push({ r, price: ticket(r.id), date });
     }
-    const scored = window.PFCore.plan(D, skiDays);
-    const base = scored.find((s) => s.label === "Day tickets only");
+    const scored = owned ? window.PFCore.planOwned(D, skiDays, owned) : window.PFCore.plan(D, skiDays);
+    // "vs tickets" baseline: day tickets for every day (for an owner: owned pass + day tickets for the rest)
+    const base = owned ? scored.find((s) => s.ikon.kind !== "pool" && s.epic.kind !== "pool" && [s.ikon, s.epic].filter((x) => x.kind === "season").length === 1) || scored[0]
+      : scored.find((s) => s.label === "Day tickets only");
     const best = scored[0];
     const totalDays = skiDays.length;
     const name = (s) => s.label === "Day tickets only" ? s.label : s.label + (s.tickets ? ` + ${s.tickets} day ticket${s.tickets > 1 ? "s" : ""}` : "");

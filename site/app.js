@@ -37,7 +37,7 @@ function start(data) {
     $("enso").hidden = false;
   }
   render();
-  window.PF = { D, bestQuote, fmtDate, esc, opts: () => ({ bag: $("bag").checked, exclude: EXCLUDE }) };
+  window.PF = { D, bestQuote, fmtDate, esc, opts: () => ({ bag: $("bag").checked, exclude: EXCLUDE, origin: $("origin").value }) };
   document.dispatchEvent(new Event("pf-ready"));
 }
 

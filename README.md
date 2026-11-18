@@ -24,6 +24,15 @@ Find trips → **Multi-mountain** shows 5- and 7-night trips that cover several 
 - **Budget.** Single-mountain searches always come first, and multi-mountain units only use what's left (about 46 extra searches a day). `scan.py --dry-run` prints the unique unit counts.
 - The logic is in `site/cluster-core.js` and tested in `tests/cluster-cases.js` (fixture quotes, plus a consistency check on every itinerary in `clusters.json`).
 
+## Help me plan (quiz)
+Plan my season opens with two choices. **I know my trips** goes to the manual planner. **Help me plan** asks 5 questions (how much, when, what matters most, pass, regions) and suggests up to 3 different season plans.
+- **Ski dates are explicit.** A trip skis the full days between flights (Thu→Sun = Fri + Sat). The arrival and flight-home days are opt-in in the planner because they depend on flight times. Pass blackouts are checked on ski days, not travel days.
+- **Whole seasons are ranked, not single trips.** A bounded beam search builds seasons in date order (10+ days between trips, each mountain once). It scores each complete season on flights + bags plus lift cost from `PFCore.plan` over every ski day, so shared day limits (Alta/Snowbird), blackouts and Session/Day product rules count across the season. Tests check it against brute force, including a case where picking the cheapest trip first gives a worse season.
+- **Owners and shoppers are different questions.** An owned pass is a sunk cost: it's priced at $0, and only uncovered days are added (day tickets or the other network's day product). Shoppers see the cheapest option against day tickets for the same ski days. Anything that relies on unverified coverage is marked provisional and names the resort.
+- **Themes:** lowest total cost; best snow (ski-day-weighted, within budget); explore different regions; big-name mountains (`data/quiz.json`). Plans that share most of their trips aren't shown twice.
+- "Open this plan in the planner" loads the trips (and the owned pass) into the planner after asking, and the totals match.
+- The logic is in `site/quiz-core.js`, tested by `tests/quiz-cases.js`.
+
 ## Data
 - `data/resorts.json`: 95 fly-to US and Canadian resorts, with pass access by tier, nearest airports and drive times
 - `data/passes.json`: passes, prices and blackout dates (2026-27)

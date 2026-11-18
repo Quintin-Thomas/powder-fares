@@ -153,7 +153,6 @@ def main() -> None:
         if legs:
             oneway[qf.stem] = legs
     clusters = load(DATA / "clusters.json", {"clusters": []})
-    pool = {s["resort"] for c in clusters["clusters"] for v in c["variants"] for s in v["stops"]}
 
     out_resorts = []
     for r in resorts:
@@ -173,7 +172,10 @@ def main() -> None:
             "clusters": clusters.get("clusters", []), "drives": clusters.get("drives", {}),
             "drive_cautions": clusters.get("drive_cautions", {}), "drive_source": clusters.get("drive_source"),
             "places": clusters.get("places", {}),
-            "cluster_routes": cluster_routes, "oneway": oneway, "day_snow": day_snow(resorts, clim, effects, pool),
+            "cluster_routes": cluster_routes, "oneway": oneway,
+            # per-ski-day snow for every resort (multi-mountain trips and the planning quiz)
+            "day_snow": day_snow(resorts, clim, effects, {r["id"] for r in resorts}),
+            "quiz": load(DATA / "quiz.json", {}),
             "enso": enso_meta or None, "health": load(STORE / "last_scan.json", None)}
     SITE.mkdir(exist_ok=True)
     (SITE / "data.json").write_text(json.dumps(data, separators=(",", ":")))

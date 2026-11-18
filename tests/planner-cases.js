@@ -138,5 +138,30 @@
       a.equal(scored[0].label, "Epic Day Pass 3-day");
       for (let i = 1; i < scored.length; i++) a.ok(scored[i - 1].cost <= scored[i].cost);
     }],
+    ["Ski dates default to the full days between flights (Thu→Sun = Fri, Sat)", (a) => {
+      a.equal(core.skiDates("2027-02-04|2027-02-07").join(","), "2027-02-05,2027-02-06");
+      a.equal(core.skiDates("2027-02-04|2027-02-07", { days: 3 }).length, 2); // old saved trips asked for 3: capped
+    }],
+    ["Arrival day and flight-home day are opt-in", (a) => {
+      a.equal(core.skiDates("2027-02-04|2027-02-07", { first: "0" })[0], "2027-02-04");
+      a.equal(core.skiDates("2027-02-04|2027-02-07", { last: "1" }).at(-1), "2027-02-07");
+      a.equal(core.skiDates("2027-02-04|2027-02-07", { first: "0", last: "1", days: 9 }).length, 4);
+    }],
+    ["Ski-day count limits the dates", (a) => {
+      a.equal(core.skiDates("2027-02-01|2027-02-08", { days: 3 }).join(","), "2027-02-02,2027-02-03,2027-02-04");
+    }],
+    ["Owned pass costs nothing extra; uncovered days are still paid", (a) => {
+      const days = [day(R.wp, 180, "2027-02-02"), day(R.pc, 275, "2027-02-03")];
+      const best = core.planOwned(D, days, "ikon_base")[0];
+      a.equal(best.cost, 139); // Winter Park on the owned pass ($0); Park City on an Epic Day 1-day ($139 < $275 ticket)
+      const ticketsOnly = core.planOwned(D, days, "ikon_base").find((o) => o.epic.kind === "none");
+      a.equal(ticketsOnly.cost, 275); // owned pass is never charged
+    }],
+    ["Owner of one network may still use the other network's day product", (a) => {
+      const days = [day(R.pc, 275, "2027-02-02"), day(R.pc, 275, "2027-02-03")];
+      const best = core.planOwned(D, days, "ikon_base")[0];
+      a.equal(best.cost, 270); // Epic Day 2-day beats two $275 tickets
+      a.ok(core.planOwned(D, days, "ikon_base").every((o) => o.ikon.pass && o.ikon.pass.id === "ikon_base"));
+    }],
   ];
 });

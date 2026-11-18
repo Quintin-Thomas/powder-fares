@@ -18,27 +18,27 @@
 
 <main class="wrap">
   <section class="controls" aria-label="Filters">
-    <label>Trip type
+    <label class="find-only">Trip type
       <select id="kind"><option value="single">Single mountain</option><option value="multi">Multi-mountain</option></select>
     </label>
-    <label>Pass
+    <label class="find-only">Pass
       <select id="pass"></select>
     </label>
     <label>From
       <select id="origin"><option value="any">LAX or SNA</option></select>
     </label>
-    <label>Month
+    <label class="find-only">Month
       <select id="month">
         <option value="all">Jan – Apr</option><option value="01">January</option>
         <option value="02">February</option><option value="03">March</option><option value="04">April</option>
       </select>
     </label>
-    <label>Trip
+    <label class="find-only">Trip
       <select id="shape">
         <option value="any">Any</option><option value="0">Mon–Thu (midweek)</option><option value="3">Thu–Sun (weekend)</option>
       </select>
     </label>
-    <label>Sort
+    <label class="find-only">Sort
       <select id="sort">
         <option value="value">Best value</option><option value="price">Cheapest</option><option value="snow">Best snow</option>
       </select>
@@ -62,12 +62,20 @@
   </div>
 
   <div id="view-plan" hidden>
+    <div class="choices" role="group" aria-label="How do you want to plan?">
+      <button class="choice" id="mode-quiz" aria-pressed="false"><strong>Help me plan</strong><span>5 quick questions. We'll suggest trips, dates and the cheapest way to pay for lifts.</span></button>
+      <button class="choice" id="mode-manual" aria-pressed="false"><strong>I know my trips</strong><span>Pick your mountains and dates, and see if a pass is worth it.</span></button>
+    </div>
+    <section id="quiz" hidden aria-live="polite"></section>
+    <div id="manual" hidden>
     <p class="summary">Add the trips you're thinking about. The planner prices your ski days every possible way (day tickets, each season pass, Ikon Session and Epic Day passes, or an Ikon and an Epic product together) and adds flights and board bags from the latest scan.</p>
+    <label class="owned">Pass you already own <select id="owned"><option value="">None yet</option></select></label>
     <section class="panel">
       <table class="plan" id="trips"><thead><tr><th>Mountain</th><th>Trip dates (flight)</th><th class="num">Ski days (dates used)</th><th class="num">Day ticket</th><th class="num">Flight</th><th></th></tr></thead><tbody></tbody></table>
       <button id="add-trip" class="btn">+ Add trip</button>
     </section>
     <section id="plan-results"></section>
+    </div>
   </div>
 </main>
 
@@ -80,5 +88,7 @@
 <script src="cluster-core.js"></script>
 <script src="clusters.js"></script>
 <script src="planner.js"></script>
+<script src="quiz-core.js"></script>
+<script src="quiz.js"></script>
 </body>
 </html>

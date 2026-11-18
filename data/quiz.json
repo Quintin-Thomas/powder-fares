@@ -1,0 +1,15 @@
+{
+  "_note": "Settings for the 'Help me plan' quiz. Regions group resort state/province codes; marquee is a hand-picked list of widely known destination mountains for the 'Big-name mountains' priority.",
+  "regions": {
+    "rockies": {"label": "Rockies", "codes": ["CO", "UT", "WY", "MT", "ID", "NM"]},
+    "canada_west": {"label": "Canada West", "codes": ["BC", "AB"]},
+    "west_coast": {"label": "West Coast", "codes": ["WA", "OR", "CA", "AK"]},
+    "east_midwest": {"label": "East & Midwest", "codes": ["VT", "NH", "ME", "NY", "PA", "WV", "QC", "ON", "MI", "MN", "WI", "OH", "IN", "MO"]}
+  },
+  "marquee": ["whistler", "vail", "jackson-hole", "alta", "snowbird", "revelstoke", "big-sky", "aspen-mountain", "snowmass",
+              "palisades", "sunshine", "lake-louise", "telluride", "park-city", "deer-valley", "breckenridge", "steamboat",
+              "sun-valley", "stowe", "killington", "tremblant", "kicking-horse", "crested-butte", "taos"],
+  "trip_counts": [1, 2, 4, 5],
+  "spacing_days": 10,
+  "stale_hours": 96
+}

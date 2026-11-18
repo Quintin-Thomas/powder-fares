@@ -91,5 +91,31 @@
     return options(D).map((o) => ({ ...o, ...price(skiDays, o.ikon, o.epic) })).sort((a, b) => a.cost - b.cost);
   }
 
-  return { GROUPS, inBlackout, seasonCover, poolCovers, price, options, plan };
+  // Someone who already owns a season pass: it costs nothing extra. Price only what it doesn't cover,
+  // with day tickets or a product from the other network. Every option keeps the owned pass on its side.
+  function planOwned(D, skiDays, passId) {
+    const owned = D.passes.find((p) => p.id === passId);
+    if (!owned) return [];
+    const brand = owned.brand.toLowerCase();
+    const free = { kind: "season", pass: { ...owned, price_adult: 0 }, label: owned.name };
+    return options(D).filter((o) => o[brand].kind === "season" && o[brand].pass.id === passId)
+      .map((o) => ({ ...o, [brand]: free }))
+      .map((o) => ({ ...o, ...price(skiDays, o.ikon, o.epic), owned: passId }))
+      .sort((a, b) => a.cost - b.cost);
+  }
+
+  // Ski dates for a trip window "depart|return". Default: the full days between the flights
+  // (day after arrival through the day before the flight home). first="0" adds the arrival day,
+  // last="1" adds the flight-home day; both depend on flight times, so they're opt-in.
+  function skiDates(win, t) {
+    const [dep, ret] = win.split("|");
+    const add = (iso, n) => new Date(Date.parse(iso + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+    const start = t && t.first === "0" ? dep : add(dep, 1);
+    const end = t && t.last === "1" ? ret : add(ret, -1);
+    const out = [];
+    for (let d = start; d <= end && (!t || t.days == null || out.length < t.days); d = add(d, 1)) out.push(d);
+    return out;
+  }
+
+  return { GROUPS, inBlackout, seasonCover, poolCovers, price, options, plan, planOwned, skiDates };
 });
