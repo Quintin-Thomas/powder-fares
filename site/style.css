@@ -146,12 +146,9 @@ tr.top td { font-weight: 600; }
 .plan td select[data-f="first"], .plan td select[data-f="last"] { display: block; margin: 4px 0 0 auto; font-size: 12px; }
 .caution { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--chip); color: var(--ink); font-size: 13px; }
 
-/* Single-mountain card (DESIGN_SPEC.md §4) */
-.card.fc { padding: 20px; gap: 14px; }
-@media (max-width: 767px) { .card.fc { padding: 16px; } }
+/* Single-mountain results (DESIGN_SPEC.md §4): one featured card (the existing #1 result), then compact cards.
+   Markup: site/cards.js. Shared .fc-* rules below are also used by the multi-mountain cards. */
 .fc p { margin: 0; }
-.fc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.fc-head h2 { font-size: 20px; line-height: 1.3; font-weight: 700; margin: 0; min-width: 0; }
 .fc-region { color: var(--muted); font-size: 14px; flex: none; }
 .fc-pass { font-size: 14px; color: var(--ink); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .flag { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; border-radius: var(--radius-chip); padding: 2px 8px; }
@@ -159,16 +156,10 @@ tr.top td { font-weight: 600; }
 .tip { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 4px 2px; min-height: 32px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .tip-text[hidden] { display: none; }
 .tip-text { display: block; flex-basis: 100%; font-size: 13px; color: var(--muted); background: var(--chip); border-radius: var(--radius-chip); padding: 8px 10px; margin-top: 4px; }
-.fc-price { border-top: 1px solid var(--line); padding-top: 12px; }
 .fc-price-label { font-size: 13px; font-weight: 500; color: var(--muted); }
 .fc .price { font-size: 32px; font-weight: 750; line-height: 1.1; margin: 2px 0 4px; }
 .fc-split { font-size: 14px; color: var(--muted); }
-.fc-trip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto; justify-content: start; gap: 8px 28px; font-size: 15px; font-weight: 600; }
-.fc-trip li:first-child { grid-column: 1 / -1; }
-.fc-trip li { display: flex; flex-direction: column; min-width: 0; }
-.fc-trip .lbl, .fc-snow .lbl, .fc-forecast .lbl { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 500; }
-.fc-snow { display: flex; flex-direction: column; gap: 4px; }
-.fc-snow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 15px; }
+.fc-forecast .lbl { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 500; }
 .fc-forecast { font-size: 14px; }
 .fc-fresh { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .fc-fresh .chip { margin: 0; font-size: 13px; }
@@ -179,6 +170,80 @@ tr.top td { font-weight: 600; }
 .fc-more table { font-size: 14px; }
 .fc-more td a { display: inline-block; padding: 4px 0; }
 .fc-details { display: grid; gap: 6px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+.muted { color: var(--muted); }
+.nw { white-space: nowrap; }
+.scope-note { margin: -4px 0 12px; font-size: 14px; color: var(--muted); max-width: 760px; }
+
+/* Route strip: origin → arrival airport → drive → mountain (real codes and drive minutes) */
+.route { display: flex; align-items: flex-start; font-size: 14px; min-width: 0; padding-bottom: 4px; }
+.route .stop { flex: none; }
+.route .code { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; font-weight: 700; font-variant-numeric: tabular-nums;
+  letter-spacing: .02em; padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius-chip); background: var(--card); }
+.route .stop.end { flex: 0 1 auto; min-width: 0; }
+.route .code.mtn { letter-spacing: 0; background: var(--ui-primary-soft); border-color: transparent; max-width: 18ch; line-height: 1.25; }
+.route .code.mtn .mk { font-size: 11px; color: var(--accent); }
+.route .leg { flex: 1 0 auto; min-width: max-content; position: relative; height: 28px; padding: 0 6px; }
+.route .leg::before { content: ""; position: absolute; left: 4px; right: 4px; top: 14px; border-top: 2px solid var(--muted); opacity: .5; }
+.route .leg.drive::before { border-top-style: dashed; }
+.route .leg-txt { display: block; padding-top: 17px; text-align: center; font-size: 12px; color: var(--muted); white-space: nowrap; line-height: 1.2; }
+@media (max-width: 480px) { .route .code.mtn .nm { display: none; } }
+@media (max-width: 400px) { .route .leg { flex: 1 1 0; min-width: 0; height: auto; } .route .leg-txt { white-space: normal; } }
+
+/* Featured result: full width; destination, route, dates and snow left; price and action right */
+.card.feature { grid-column: 1 / -1; padding: 0; gap: 0; overflow: hidden; border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.ft-body { padding: 20px 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: 16px 28px; align-items: start; }
+.ft-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ft-eyebrow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.ft-credit { display: inline-flex; align-items: center; min-height: 24px; font-size: 12px; font-weight: 400; color: var(--muted); text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+.ft-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.ft-title h2 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+.feature .fc-pass { margin-top: -4px; }
+.feature .route { font-size: 15px; max-width: 560px; }
+.ft-facts { display: flex; flex-wrap: wrap; gap: 8px 32px; }
+.ft-facts > div { display: flex; flex-direction: column; min-width: 0; }
+.ft-k { font-size: 13px; color: var(--muted); }
+.ft-v { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.ft-snow { font-weight: 400; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 15px; }
+.feature .fc-more { margin-top: -6px; }
+.ft-price { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.ft-price .price { font-size: 34px; margin: 0; }
+.ft-price .fc-cta { margin: 6px 0 2px; }
+@media (max-width: 899px) { .ft-body { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 767px) { .ft-body { padding: 16px; } .ft-title h2 { font-size: 22px; } .ft-price .price { font-size: 30px; } }
+
+/* Featured photo: shallow, supporting, fixed height (no layout shift), fades into the solid card. Never under text. */
+.ft-media { height: 132px; position: relative; overflow: hidden; background: var(--ui-primary-soft); }
+.ft-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ft-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, var(--card) 100%); }
+.feature.has-photo .ft-body { padding-top: 6px; }
+@media (max-width: 767px) { .ft-media { height: 96px; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ft-media img { filter: brightness(.9) saturate(.92); } }
+
+/* Compact results: every other mountain */
+.card.compact { padding: 16px 18px; gap: 8px; }
+.cp-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.cp-id { min-width: 0; }
+.cp-id h2 { font-size: 18px; line-height: 1.3; font-weight: 700; margin: 0; }
+.cp-sub { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+.compact .cp-sub { margin-top: 2px; }
+.cp-price { text-align: right; flex: none; }
+.compact .price { font-size: 26px; line-height: 1.1; margin: 0; }
+.cp-pl { font-size: 12px; color: var(--muted); }
+.cp-when { font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.cp-snow { font-size: 14px; line-height: 1.7; }
+.cp-snow .grade { margin-right: 2px; }
+.cp-meta { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.cp-meta .chip { margin: 0 0 0 2px; white-space: nowrap; }
+.cp-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 16px; margin-top: 2px; }
+.cp-actions .fc-cta { min-height: 40px; padding: 6px 14px; font-size: 14px; }
+.cp-actions .fc-more { flex: 1 1 200px; min-width: 0; }
+.cp-actions .fc-more summary { min-height: 40px; }
+.cp-actions .fc-more[open] { flex-basis: 100%; }
+@media (max-width: 480px) {
+  .cp-head { flex-direction: column; gap: 2px; }
+  .cp-price { text-align: left; display: flex; align-items: baseline; gap: 8px; }
+  .cp-actions .fc-cta, .cp-actions .fc-more summary { min-height: 44px; }
+}
 
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 

@@ -132,6 +132,7 @@ function render() {
   try { localStorage.setItem("pf", JSON.stringify(opts)); } catch (e) {}
   const pass = D.passes.find((p) => p.id === opts.pass);
   const origins = opts.origin === "any" ? D.origins : [opts.origin];
+  $("scope-note").hidden = true; // single-mountain scope note; re-shown below when single results exist
   if (opts.kind === "multi" && window.PFClusterUI) return window.PFClusterUI.render(opts, pass, origins);
 
   const cards = [];
@@ -169,12 +170,13 @@ function render() {
   $("summary").textContent = cards.length
     ? `${cards.length} mountains on the ${pass.name} with flights found${opts.bag ? ", board bag included" : ""}.`
     : "";
-    $("cards").innerHTML = cards.length ? cards.map((c) => card(c, pass)).join("")
+  $("scope-note").hidden = !cards.length;
+  $("cards").innerHTML = cards.length ? PFCards.list(cards, pass, cardHelpers(opts))
     : `<div class="empty"><strong>No trips match these filters.</strong>
         <p class="hint">${EXCLUDE.size ? `You're excluding ${EXCLUDE.size} airline${EXCLUDE.size > 1 ? "s" : ""} (${esc([...EXCLUDE].join(", "))}), which can hide flights. ` : ""}Try another month or trip length, or check back later: flight scans rotate through every airport over a few days.</p></div>`;
 }
 
-// ---- Single-mountain card (Modern Travel Search, DESIGN_SPEC.md §4) ----
+// ---- Single-mountain cards (Modern Travel Search, DESIGN_SPEC.md §4): markup lives in cards.js ----
 // Presentation only: values, links and ranking come from render() unchanged.
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const money = (n) => usd.format(n);
@@ -201,68 +203,8 @@ function fareAgeShort(iso) {
   return `<span${h > 96 ? ' class="stale"' : ""}>Fare checked ${ago}${h > 96 ? " (may be out of date)" : ""}</span>`;
 }
 
-function card(c, pass) {
-  const { r, best: b } = c;
-  const id = r.id.replace(/[^a-z0-9-]/gi, "");
-  const brand = pass.name.replace(" Pass", "");
-  const allowance = c.access === "unlimited" ? "unlimited ski days here"
-    : typeof c.access === "number" ? `up to ${c.access} ski days here this season`
-    : String(c.access).replace(/^(\d+) days/, "up to $1 ski days");
-  const unverified = r.verify && r.verify.includes(pass.id);
-  const verify = unverified
-    ? `<span class="flag warn">Day limit not verified</span> ${toggletip(`v-${id}`, "Why?", `We list this resort for ${esc(pass.name)} from published 2026-27 pass lists, but haven't confirmed the exact day allowance on the official site. Check ikonpass.com or epicpass.com before relying on it.`)}` : "";
-
-  const lvlText = { low: "below usual", typical: "about usual", high: "above usual" }[b.win.fare_level];
-  const lvl = lvlText ? `<span class="chip ${b.win.fare_level}">Fare ${lvlText} for these dates</span>` : "";
-
-  const g = grade(b.snow);
-  const snowTip = "Historical, not a forecast: how this week usually looks at this mountain, from 10 past winters (typical base depth plus usual new snow), ranked against every mountain and week we track."
-    + (D.enso && r.enso ? ` Adjusted for this winter's ${D.enso.label} using ${r.enso.n} similar past winters.` : "");
-  const snow = g
-    ? `${gradeBadge(b.snow)} <span class="meta">Usual base ${Math.round(b.snow.depth * 100)} cm</span> ${toggletip(`s-${id}`, "What's this?", esc(snowTip))}`
-    : `<span class="meta">Not available yet</span>`;
-  const fc = b.snow && b.snow.forecast_fresh != null
-    ? `<div class="fc-forecast"><span class="lbl">16-day forecast</span> about ${b.snow.forecast_fresh} cm of new snow around your dates</div>` : "";
-  const now = r.season && r.season.depth_m != null && r.season.normal_m
-    ? `<p>Snow on the ground now (${fmtDate(r.season.date)}): ${Math.round(r.season.depth_m * 100)} cm · usual for this date: ${Math.round(r.season.normal_m * 100)} cm</p>` : "";
-  const enso = r.enso && D.enso
-    ? `<p>Past ${esc(D.enso.label)} winters: ${r.enso.raw_pct >= 0 ? "+" : ""}${r.enso.raw_pct}% snow here (Dec–Mar, ${r.enso.n} winters vs all ${r.enso.of} since 1980). The rating uses half of that, capped at ±25%, because the sample is small.</p>` : "";
-
-  const rows = c.top.map((x) => `<tr><td>${fmtDate(x.d)} → ${fmtDate(x.rt)}</td><td>${x.o} → ${x.ap.code}</td>
-      <td class="num">${money(x.q.total)}</td><td class="num">${gradeBadge(x.snow, true)}</td>
-      <td><a href="${esc(x.win.url)}" target="_blank" rel="noopener" aria-label="Check fares, ${x.o} to ${x.ap.code}, ${fmtDate(x.d)} to ${fmtDate(x.rt)} (opens in a new tab)">Check fares</a></td></tr>`).join("");
-  const blockedNote = c.blocked.length
-    ? `<p class="note">Not shown: ${c.blocked.length} other date option${c.blocked.length > 1 ? "s" : ""} that overlap ${esc(pass.name)} blackout dates (${[...new Set(c.blocked.map((x) => `${fmtDate(x.d)} → ${fmtDate(x.rt)}`))].slice(0, 4).join("; ")}${c.blocked.length > 4 ? "; …" : ""}).</p>` : "";
-
-  return `<article class="card fc" aria-labelledby="h-${id}">
-    <div class="fc-head"><h2 id="h-${id}">${esc(r.name)}</h2><span class="fc-region">${esc(r.region)}</span></div>
-    <p class="fc-pass">${esc(brand)}: ${esc(allowance)} ${verify}</p>
-
-    <div class="fc-price">
-      <div class="fc-price-label">Estimated round-trip flight${b.q.bag ? " + board bag" : ""}</div>
-      <div class="price">${money(b.q.total)}</div>
-      <div class="fc-split">${b.q.bag ? `${money(b.q.fare)} base fare + ${money(b.q.bag)} board bag (both ways)` : "Fare only, no board bag"} · ${esc(b.q.name)} · ${b.q.stops ? `${b.q.stops} stop${b.q.stops > 1 ? "s" : ""}` : "nonstop"}</div>
-    </div>
-
-    <ul class="fc-trip">
-      <li><span class="lbl">Dates</span> ${fmtDate(b.d)} → ${fmtDate(b.rt)}</li>
-      <li><span class="lbl">Route</span> ${b.o} → ${b.ap.code}</li>
-      <li><span class="lbl">Drive</span> ${b.ap.drive_min} min</li>
-    </ul>
-
-    <div class="fc-snow"><span class="lbl">Historical snow this week</span><div class="fc-snow-row">${snow}</div>${fc}</div>
-
-    <p class="fc-fresh">${fareAgeShort(b.win.checked)} ${lvl}</p>
-    <p class="fc-excl">Not included: lift tickets, lodging, ground transport.</p>
-
-    <a class="fc-cta" href="${esc(b.win.url)}" target="_blank" rel="noopener">Check fares for these dates on Google Flights <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-
-    <details class="fc-more"><summary>More dates, blackout exclusions, and snow details</summary>
-      <table><caption class="sr-only">Other date options for ${esc(r.name)}</caption>
-        <thead><tr><th scope="col">Dates</th><th scope="col">Route</th><th scope="col" class="num">Flight${b.q.bag ? " + bag" : ""}</th><th scope="col" class="num">Snow</th><th scope="col"><span class="sr-only">Link</span></th></tr></thead><tbody>${rows}</tbody></table>
-      ${blockedNote}
-      <div class="fc-details">${now}${enso}
-        ${lvlText ? `<p>Fare level compares today's cheapest fare for these exact dates with Google's daily lowest fares for the same dates over the past 60 days (all airlines).</p>` : ""}</div>
-    </details>
-  </article>`;
+// Formatting helpers handed to the card templates in cards.js (layout only; values come from render()).
+const SORT_LABEL = { price: "cheapest", snow: "best snow", value: "best value" }; // matches the Sort menu wording
+function cardHelpers(opts) {
+  return { esc, money, fmtDate, grade, gradeBadge, toggletip, fareAgeShort, enso: D.enso, sortLabel: SORT_LABEL[opts.sort] || opts.sort };
 }
