@@ -2,7 +2,7 @@
 
 import sys
 import unittest
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -139,6 +139,74 @@ class SnowTests(unittest.TestCase):
         finally:
             snow.fetch_text = orig
         self.assertEqual((cur["phase"], cur["strength"], cur["auto"]), ("la_nina", "weak", True))
+
+
+class ScanPickTests(unittest.TestCase):
+    """Which searches a run makes: overdue re-checks keep a share of the budget while new windows fill in."""
+
+    TODAY = date(2026, 11, 18)
+    NOW = datetime(2026, 11, 18, 12, 0, tzinfo=timezone.utc)
+
+    def units(self, airports=("BZN", "DEN", "SLC"), origins=("LAX", "SNA")):
+        return [("rt", o, a, d, r) for o in origins for a in airports for d, r in scan.windows(self.TODAY)]
+
+    def stamp(self, days_ago):
+        return (self.NOW - timedelta(days=days_ago)).isoformat(timespec="minutes").replace("+00:00", "Z")
+
+    def test_overdue_rechecks_keep_their_share_despite_a_new_window_backlog(self):
+        units = self.units()
+        old = [u for u in units if u[1] == "LAX" and u[2] == "BZN"]  # all 7-day or 4-day windows, 9 days old
+        state = {scan.unit_key(u): self.stamp(9) for u in old}
+        todo, info = scan.pick(units, [], state, self.NOW, self.TODAY, budget=20, share=0.4)
+        self.assertEqual(len(todo), 20)
+        self.assertEqual(info["recheck"], 8)
+        self.assertEqual(info["new"], 12)
+        self.assertEqual(sum(scan.unit_key(u) in state for u in todo), 8)
+
+    def test_unused_recheck_budget_goes_to_new_windows_and_back(self):
+        units = self.units()
+        state = {scan.unit_key(units[0]): self.stamp(30)}  # one overdue fare
+        todo, info = scan.pick(units, [], state, self.NOW, self.TODAY, budget=20, share=0.4)
+        self.assertEqual((info["recheck"], info["new"], len(todo)), (1, 19, 20))
+        # nothing left to search for the first time: the whole budget goes to re-checks
+        state = {scan.unit_key(u): self.stamp(30) for u in units}
+        todo, info = scan.pick(units, [], state, self.NOW, self.TODAY, budget=20, share=0.4)
+        self.assertEqual((info["recheck"], info["new"], len(todo)), (20, 0, 20))
+
+    def test_fares_within_their_interval_are_not_rechecked(self):
+        units = self.units()
+        state = {scan.unit_key(u): self.stamp(1) for u in units}  # every window is 47+ days out: 4 or 7 day interval
+        todo, info = scan.pick(units, [], state, self.NOW, self.TODAY, budget=20)
+        self.assertEqual((todo, info["recheck_due"]), ([], 0))
+
+    def test_most_overdue_is_rechecked_first(self):
+        units = self.units()
+        state = {scan.unit_key(u): self.stamp(10) for u in units}
+        state[scan.unit_key(units[-1])] = self.stamp(40)
+        todo, _ = scan.pick(units, [], state, self.NOW, self.TODAY, budget=3)
+        self.assertEqual(todo[0], units[-1])
+
+    def test_first_searches_go_earliest_departure_first_across_every_route(self):
+        units = self.units()
+        todo, info = scan.pick(units, [], {}, self.NOW, self.TODAY, budget=6)
+        first = scan.windows(self.TODAY)[0][0]
+        self.assertTrue(all(u[3] == first for u in todo), "nearest date on every route before any later date")
+        self.assertEqual({(u[1], u[2]) for u in todo}, {(o, a) for o in ("LAX", "SNA") for a in ("BZN", "DEN", "SLC")})
+        self.assertEqual(info["new_left"], len(units))
+
+    def test_multi_mountain_units_only_get_leftover_budget(self):
+        units = self.units(airports=("DEN",), origins=("LAX",))
+        extra = [("ow", "LAX", "DEN", date(2027, 1, 9), None), ("ow", "SLC", "LAX", date(2027, 1, 14), None)]
+        todo, info = scan.pick(units, extra, {}, self.NOW, self.TODAY, budget=len(units))
+        self.assertFalse(set(todo) & set(extra))
+        todo, info = scan.pick(units, extra, {}, self.NOW, self.TODAY, budget=len(units) + 1)
+        self.assertEqual((todo[-1], info["multi"], info["multi_due"]), (extra[0], 1, 2))
+        todo, _ = scan.pick(units, extra, {}, self.NOW, self.TODAY, budget=5, multi_only=True)
+        self.assertEqual(todo, extra)
+
+    def test_publish_only_run_searches_nothing(self):
+        todo, info = scan.pick(self.units(), [], {}, self.NOW, self.TODAY, budget=0)
+        self.assertEqual((todo, info["recheck"], info["new"], info["multi"]), ([], 0, 0, 0))
 
 
 if __name__ == "__main__":
