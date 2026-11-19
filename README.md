@@ -6,9 +6,9 @@ A ski-pass trip finder. Choose a pass (Ikon, Ikon Base, Epic, Epic Local) and se
 - **snow outlook**: an A–F grade for that week (from a 0–100 rank), based on 10 past seasons (Open-Meteo), with the 16-day forecast once the dates are in range
 
 ## How it runs
-A GitHub Action runs twice a day (`.github/workflows/daily.yml`):
+A GitHub Action runs four times a day, every 6 hours (`.github/workflows/daily.yml`):
 1. `snow.py`: builds the snow climatology once, then refreshes this season's base and the 16-day forecast
-2. `scan.py`: searches up to 350 of the most overdue (origin, airport, date window) combinations and saves the cheapest fare per airline. Trips within 30 days are rechecked every 2 days, trips 31–75 days out every 4 days, and later trips weekly. Steady state is about 550 searches a day, and Google's 60-day history fills the days between checks
+2. `scan.py`: searches up to 150 (origin, airport, date window) combinations per run, overdue re-checks and never-searched windows first, and saves the cheapest fare per airline. Trips within 30 days are rechecked every 2 days, trips 31–75 days out every 4 days, and later trips weekly. When Google starts throttling (a burst of status-13 errors), the scanner pauses for 5 minutes instead of retrying quickly, at most twice a run. Steady state is about 305 searches a day from LAX, and Google's 60-day history fills the days between checks
 3. `build.py`: merges everything into `site/data.json`
 4. commits `store/` and publishes `site/` to GitHub Pages
 
