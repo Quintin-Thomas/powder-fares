@@ -1,7 +1,12 @@
 """Scan round-trip fares from origins to every resort airport, a few hundred searches per run.
 
 Unit of work = (origin, airport, date window). Units are shared by every resort and pass that
-uses the airport. Each run searches the stalest units first, up to --budget.
+uses the airport. Each run splits --budget between two queues (see pick()):
+  - re-checks: windows already searched and now past their refresh interval, most overdue first,
+    guaranteed up to CONFIG["refresh_share"] of the budget
+  - first searches: windows never searched, earliest departure first across every origin and airport,
+    so each route gets its nearest dates priced before anything further out
+Budget one queue doesn't need goes to the other.
 
 Multi-mountain trips (data/clusters.json) add two more kinds of unit, scanned only with budget left
 over after the single-mountain units:
@@ -33,6 +38,8 @@ CONFIG = {
     "season": ["2027-01-04", "2027-04-25"],
     # How often to re-search a window, by days until departure: (max days out, refresh every N days)
     "refresh": [(30, 2), (75, 4), (10_000, 7)],
+    # Share of each run's budget kept for re-checking overdue fares while never-searched windows remain
+    "refresh_share": 0.4,
     # (depart weekday, nights): Mon-Thu midweek and Thu-Sun weekend trips
     "window_shapes": [(0, 3), (3, 3)],
     # Multi-mountain trips: Sat -> Thu (5 nights) and Sat -> Sat (7 nights)
@@ -84,6 +91,50 @@ def unit_key(u: tuple) -> str:
     return f"{a}-{b}|{d}|{r}" if kind == "rt" else f"ow:{a}-{b}|{d}"
 
 
+def every(u: tuple, today: date) -> int:
+    """Refresh interval in days for a unit, by how far away its departure is."""
+    return next(n for limit, n in CONFIG["refresh"] if (u[3] - today).days <= limit)
+
+
+def overdue(u: tuple, state: dict, now: datetime, today: date) -> float:
+    """How overdue a unit is, as a multiple of its refresh interval (never searched = very overdue)."""
+    last = state.get(unit_key(u))
+    if not last:
+        return 1e6
+    t = datetime.fromisoformat(last.replace("Z", "+00:00"))
+    if t.tzinfo is None:  # older entries were saved without a zone
+        t = t.replace(tzinfo=timezone.utc)
+    return (now - t).total_seconds() / 86400 / every(u, today)
+
+
+def pick(units: list[tuple], extra: list[tuple], state: dict, now: datetime, today: date, budget: int,
+         share: float | None = None, multi_only: bool = False) -> tuple[list[tuple], dict]:
+    """Choose this run's searches. Returns (units to search in order, counts for the log and health record).
+
+    Single-mountain units come first, as two queues:
+      re-checks     searched before and now due; most overdue first; at least `share` of the budget
+                    when that many are due
+      first search  never searched; earliest departure first, then origin, then airport, so every
+                    route gets its nearest dates before any route gets later ones
+    Whatever one queue leaves unused goes to the other. Multi-mountain units only get what is left after both.
+    """
+    share = CONFIG["refresh_share"] if share is None else share
+    single = [] if multi_only else units
+    new = sorted((u for u in single if unit_key(u) not in state), key=lambda u: (u[3], u[1], u[2]))
+    due = sorted((u for u in single if unit_key(u) in state and overdue(u, state, now, today) >= 1),
+                 key=lambda u: (-overdue(u, state, now, today), u[3], u[1], u[2]))
+    n_due = min(len(due), round(budget * share))
+    n_new = min(len(new), budget - n_due)
+    n_due = min(len(due), budget - n_new)  # hand back budget the first-search queue didn't need
+    todo = due[:n_due] + new[:n_new]
+    multi = sorted((u for u in extra if overdue(u, state, now, today) >= 1),
+                   key=lambda u: (-overdue(u, state, now, today), u[3]))  # ties (never searched): soonest first
+    todo += multi[: budget - len(todo)]
+    info = {"recheck_due": len(due), "recheck": n_due, "new_left": len(new), "new": n_new,
+            "multi_due": len(multi), "multi": len(todo) - n_due - n_new}
+    return todo, info
+
+
 def bag_total(fare: int, airlines: list[str], directions: int = 2) -> int:
     fees = AIRLINES["board_bag_fee"]
     return fare + max(fees.get(a, AIRLINES["default_fee"]) for a in airlines) * directions
@@ -124,30 +175,16 @@ def main() -> int:
     state = load(STORE / "scan_state.json", {})
     now = datetime.now(timezone.utc)
 
-    def every(u) -> int:
-        return next(n for limit, n in CONFIG["refresh"] if (u[3] - today).days <= limit)
-
-    def overdue(u) -> float:
-        """How overdue a unit is, as a multiple of its refresh interval (never searched = very overdue)."""
-        last = state.get(unit_key(u))
-        if not last:
-            return 1e6
-        t = datetime.fromisoformat(last.replace("Z", "+00:00"))
-        if t.tzinfo is None:  # older entries were saved without a zone
-            t = t.replace(tzinfo=timezone.utc)
-        return (now - t).total_seconds() / 86400 / every(u)
-
-    # Single-mountain freshness first; multi-mountain units only get budget that's left over.
-    units.sort(key=overdue, reverse=True)
-    extra.sort(key=lambda u: (-overdue(u), u[3]))  # ties (e.g. never searched): soonest trips first
-    due = ([] if args.multi_only else [u for u in units if overdue(u) >= 1]) + [u for u in extra if overdue(u) >= 1]
-    todo = due[: args.budget]
+    todo, plan = pick(units, extra, state, now, today, args.budget, multi_only=args.multi_only)
     n_ow = sum(u[0] == "ow" for u in extra)
     log(f"{len(units)} single-mountain units, {len(extra)} multi-mountain units "
-        f"({len(extra) - n_ow} round trip, {n_ow} one-way, de-duplicated); {len(due)} due, searching {len(todo)}")
+        f"({len(extra) - n_ow} round trip, {n_ow} one-way, de-duplicated)")
+    log(f"searching {len(todo)}: {plan['recheck']} re-checks (of {plan['recheck_due']} due), "
+        f"{plan['new']} first searches (of {plan['new_left']} never searched), "
+        f"{plan['multi']} multi-mountain (of {plan['multi_due']} due)")
     if args.dry_run:
-        need = sum(1 / every(u) for u in units)
-        need_x = sum(1 / every(u) for u in extra)
+        need = sum(1 / every(u, today) for u in units)
+        need_x = sum(1 / every(u, today) for u in extra)
         log(f"steady state needs ~{need:.0f} searches/day for single mountains + ~{need_x:.0f} for multi-mountain trips")
         return 0
 
@@ -224,6 +261,7 @@ def main() -> int:
         save(STORE / "last_scan.json", {
             "finished": datetime.now(timezone.utc).isoformat(timespec="minutes").replace("+00:00", "Z"),
             "searched": len(done), "planned": len(todo), "ok": ok, "failed": fail,
+            "planned_rechecks": plan["recheck"], "planned_new": plan["new"], "never_searched": plan["new_left"],
             "minutes": round((time.monotonic() - started) / 60, 1),
             "multi_searched": len(set(done) & set(extra)), "attempt_errors": src.errors,
             "failure_samples": src.samples, "stopped_early": stopped_early,
