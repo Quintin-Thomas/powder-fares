@@ -34,7 +34,9 @@ from pricing import GoogleFlights, Itinerary
 ROOT = Path(__file__).resolve().parent
 DATA, STORE = ROOT / "data", ROOT / "store"
 CONFIG = {
-    "origins": ["LAX", "SNA"],
+    # Departure airports. LAX only for now: it serves every resort airport, and one origin halves the
+    # searches needed. Add SNA or BUR here later; build.py publishes only the origins listed here.
+    "origins": ["LAX"],
     "season": ["2027-01-04", "2027-04-25"],
     # How often to re-search a window, by days until departure: (max days out, refresh every N days)
     "refresh": [(30, 2), (75, 4), (10_000, 7)],
