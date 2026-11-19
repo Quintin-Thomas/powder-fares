@@ -3,6 +3,9 @@
 Fixes over plain fast-flights:
 - merges Google's "top flights" block, which fast-flights skips and which often holds the cheapest fare
 - returns Google's price insights: typical range and ~60 days of daily price history
+- backs off when Google signals throttling: a burst of status-13 errors ("google_error") triggers one
+  multi-minute pause instead of quick retries (at most a couple per run; scan.py still stops after
+  15 failed searches in a row)
 """
 
 from __future__ import annotations
@@ -22,8 +25,15 @@ from .source import Itinerary, Quote, SearchResult
 class GoogleFlights:
     name = "google"
 
-    def __init__(self, currency: str = "USD", pause: float = 2.0, attempts: int = 3, log=print):
+    def __init__(self, currency: str = "USD", pause: float = 2.0, attempts: int = 3, log=print,
+                 cooldown: float = 300.0, burst: int = 3, burst_window: float = 120.0, max_cooldowns: int = 2,
+                 clock=time.monotonic, sleep=time.sleep):
         self.currency, self.pause, self.attempts, self.log = currency, pause, attempts, log
+        # Throttle handling: `burst` google_errors within `burst_window` seconds -> pause `cooldown` seconds.
+        self.cooldown, self.burst, self.burst_window, self.max_cooldowns = cooldown, burst, burst_window, max_cooldowns
+        self.clock, self.sleep = clock, sleep
+        self.cooldowns = 0  # pauses taken this run, for scan health
+        self._recent: list[float] = []  # times of recent google_errors
         self.proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
         self.errors: dict[str, int] = {}  # failed attempts by kind, for scan health
         self.samples: list[dict] = []  # first few failures, kept small
@@ -50,7 +60,7 @@ class GoogleFlights:
                                 depart_time=_hhmm(f.flights[0].departure) if f.flights else None,
                                 arrive_time=_hhmm(f.flights[-1].arrival) if f.flights else None)
                           for f in flights if f.price and f.price > 0]
-                time.sleep(self.pause)
+                self.sleep(self.pause)
                 return SearchResult(itinerary=it, quotes=quotes, url=q.url(), currency=self.currency, **_insights(payload))
             except Exception as e:  # network hiccups, throttling, page changes
                 self.log(f"  {it.key()} attempt {i + 1} failed: {type(e).__name__}: {e}")
@@ -61,9 +71,24 @@ class GoogleFlights:
                     self.samples.append({"route": it.key(), "kind": kind, "detail": str(e)[:300]})
                 if kind == "bot_check":
                     break  # Google wants us to slow down: don't retry this one, move on after the pause
-                time.sleep(5 * (i + 1))
-        time.sleep(self.pause * 4)
+                if kind == "google_error" and self._throttled():
+                    continue  # already paused for minutes; no extra backoff before the next attempt
+                self.sleep(5 * (i + 1))
+        self.sleep(self.pause * 4)
         return None
+
+    def _throttled(self) -> bool:
+        """Record a google_error; on a burst, pause once for `cooldown` seconds. True if it paused."""
+        now = self.clock()
+        self._recent = [t for t in self._recent if now - t <= self.burst_window] + [now]
+        if len(self._recent) < self.burst or self.cooldowns >= self.max_cooldowns:
+            return False
+        self.cooldowns += 1
+        self._recent = []
+        self.log(f"  Google is throttling (status 13 x{self.burst} in {self.burst_window:.0f}s): "
+                 f"pausing {self.cooldown / 60:.0f} min ({self.cooldowns} of {self.max_cooldowns} this run)")
+        self.sleep(self.cooldown)
+        return True
 
 
 class PageError(ValueError):

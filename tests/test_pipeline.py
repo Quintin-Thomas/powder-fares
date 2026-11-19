@@ -209,5 +209,57 @@ class ScanPickTests(unittest.TestCase):
         self.assertEqual((todo, info["recheck"], info["new"], info["multi"]), ([], 0, 0, 0))
 
 
+class ThrottleCooldownTests(unittest.TestCase):
+    """A burst of Google status-13 errors pauses the scanner for minutes instead of retrying quickly."""
+
+    ERROR = _page("AF_initDataCallback({key: 'ds:1', hash: '2', data:null, errorHasStatus: true, sideChannel: {}});")
+    BOT = _page(None, title="Verifying...")
+
+    def source(self, pages, **kw):
+        t = [0.0]
+        slept = []
+
+        def sleep(s):
+            slept.append(s)
+            t[0] += s
+
+        src = google.GoogleFlights(pause=1.5, log=lambda *_: None, clock=lambda: t[0], sleep=sleep, **kw)
+        feed = iter(pages)
+        orig = google.fetch_flights_html
+        google.fetch_flights_html = lambda q, proxy=None: next(feed)
+        self.addCleanup(setattr, google, "fetch_flights_html", orig)
+        return src, slept, t
+
+    def it(self):
+        return google.Itinerary("LAX", "DEN", date(2027, 1, 25), date(2027, 1, 28))
+
+    def test_burst_of_status_13_pauses_once(self):
+        src, slept, _ = self.source([self.ERROR] * 3)
+        self.assertIsNone(src.search(self.it()))
+        self.assertEqual(src.cooldowns, 1)
+        self.assertEqual(slept, [5, 10, 300.0, 1.5 * 4])  # two quick backoffs, then the pause; no backoff after it
+        self.assertEqual(src.errors, {"google_error": 3})
+
+    def test_pauses_are_capped_per_run(self):
+        src, slept, _ = self.source([self.ERROR] * 9)
+        for _ in range(3):
+            src.search(self.it())
+        self.assertEqual(src.cooldowns, 2)
+        self.assertEqual(slept.count(300.0), 2)
+
+    def test_spread_out_errors_do_not_pause(self):
+        src, slept, t = self.source([self.ERROR] * 3, attempts=1)
+        for _ in range(3):
+            src.search(self.it())
+            t[0] += 200  # next error lands outside the 120 s window
+        self.assertEqual((src.cooldowns, slept.count(300.0)), (0, 0))
+
+    def test_bot_check_is_not_retried_and_does_not_pause(self):
+        src, slept, _ = self.source([self.BOT])
+        self.assertIsNone(src.search(self.it()))
+        self.assertEqual((src.cooldowns, slept), (0, [1.5 * 4]))
+        self.assertEqual(src.errors, {"bot_check": 1})
+
+
 if __name__ == "__main__":
     unittest.main()

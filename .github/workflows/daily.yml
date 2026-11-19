@@ -1,9 +1,9 @@
-name: Daily scan and publish (twice a day)
+name: Daily scan and publish (four times a day)
 
 on:
   schedule:
-    - cron: "17 12 * * *"   # ~4-5am Pacific
-    - cron: "17 0 * * *"    # ~4-5pm Pacific
+    # Every 6 hours in smaller batches: a throttled run costs less, and requests are spread out.
+    - cron: "17 0,6,12,18 * * *"   # ~4-5pm, 10-11pm, 4-5am, 10-11am Pacific
   push:  # code/site changes: rebuild and publish without a flight scan
     branches: [main]
     paths: ["site/**", "data/**", "build.py", "snow.py", "scan.py", "pricing/**", ".github/workflows/daily.yml"]
@@ -11,7 +11,7 @@ on:
     inputs:
       budget:
         description: "Max flight searches this run"
-        default: "350"
+        default: "150"
 
 permissions:
   contents: write
@@ -40,7 +40,7 @@ jobs:
         # scan.py stops itself at 35 min; the step limit is a backstop, and progress is saved every 25 searches
         timeout-minutes: 40
         continue-on-error: true
-        run: python scan.py --budget "${{ github.event_name == 'push' && '0' || github.event.inputs.budget || '350' }}"
+        run: python scan.py --budget "${{ github.event_name == 'push' && '0' || github.event.inputs.budget || '150' }}"
       - name: Build page data
         run: python build.py
       - name: Save data back to the repo

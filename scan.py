@@ -266,7 +266,7 @@ def main() -> int:
             "planned_rechecks": plan["recheck"], "planned_new": plan["new"], "never_searched": plan["new_left"],
             "minutes": round((time.monotonic() - started) / 60, 1),
             "multi_searched": len(set(done) & set(extra)), "attempt_errors": src.errors,
-            "failure_samples": src.samples, "stopped_early": stopped_early,
+            "failure_samples": src.samples, "stopped_early": stopped_early, "cooldowns": src.cooldowns,
             "avg_seconds": round(sum(secs) / len(secs), 1) if secs else None,
             "windows_total": len(units), "windows_checked_7d": sum(map(recent, units)),
             "multi_total": len(extra), "multi_checked_7d": sum(map(recent, extra))})
