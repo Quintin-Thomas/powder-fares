@@ -1,7 +1,7 @@
 # Powder Fares
 
 A ski-pass trip finder. Choose a pass (Ikon, Ikon Base, Epic, Epic Local) and see every fly-to mountain on it with:
-- **the real round-trip cost from LAX/SNA**: Google Flights fares plus the snowboard-bag fee, with any airline excludable (Frontier by default)
+- **the real round-trip cost from LAX (other LA airports may be added later)**: Google Flights fares plus the snowboard-bag fee, with any airline excludable (Frontier by default)
 - **buy timing**: whether today's fare is low, typical or high compared with Google's 60-day history for that route and date
 - **snow outlook**: an A–F grade for that week (from a 0–100 rank), based on 10 past seasons (Open-Meteo), with the 16-day forecast once the dates are in range
 

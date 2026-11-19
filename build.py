@@ -7,6 +7,8 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from statistics import median
 
+from scan import CONFIG as SCAN_CONFIG
+
 ROOT = Path(__file__).resolve().parent
 DATA, STORE, SITE = ROOT / "data", ROOT / "store", ROOT / "site"
 
@@ -103,9 +105,13 @@ def main() -> None:
     fcast = load(STORE / "snow" / "forecast.json", {})
     today = date.today().isoformat()
 
+    # Publish only the configured departure airports; quotes kept in store/ for others are left untouched.
+    origins = set(SCAN_CONFIG["origins"])
     routes, cluster_routes = {}, {}
     for qf in sorted((STORE / "quotes").glob("*.json")):
         pair = qf.stem
+        if pair.split("-")[0] not in origins:
+            continue
         quotes, hist = load(qf, {}), load(STORE / "history" / qf.name, {})
         wins, cwins = {}, {}
         for wkey, q in quotes.items():
@@ -148,6 +154,8 @@ def main() -> None:
     # Multi-mountain trips: one-way legs, cluster definitions and per-ski-day snow.
     oneway = {}
     for qf in sorted((STORE / "quotes" / "ow").glob("*.json")):
+        if not origins & set(qf.stem.split("-")):  # a leg must start or end at a configured origin
+            continue
         legs = {d: {k: q.get(k) for k in ("checked", "url", "by_airline", "currency")}
                 for d, q in load(qf, {}).items() if d > today}
         if legs:

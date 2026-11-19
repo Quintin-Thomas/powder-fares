@@ -20,9 +20,12 @@ loadData();
 function start(data) {
   D = data;
   $("pass").innerHTML = D.passes.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
-  $("origin").innerHTML += D.origins.map((o) => `<option value="${o}">${o} only</option>`).join("");
+  // "any" = every published origin; per-airport choices only when there is more than one.
+  $("origin").innerHTML = `<option value="any">${D.origins.join(" or ")}</option>`
+    + (D.origins.length > 1 ? D.origins.map((o) => `<option value="${o}">${o} only</option>`).join("") : "");
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem("pf") || "{}"); for (const k in saved) if ($(k)) $(k)[typeof saved[k] === "boolean" ? "checked" : "value"] = saved[k]; } catch (e) {}
+  if (!$("origin").value) $("origin").value = "any"; // a saved airport that is no longer published
   syncShape(saved.shape);
   $("kind").addEventListener("change", () => syncShape());
   setupAirlines();
